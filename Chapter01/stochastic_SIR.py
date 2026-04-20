@@ -17,16 +17,18 @@ Generates figures:
 Note that this code is based on stochastic_SIR.m
 """
 
+# =============================================================================
+# Packages
+# =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-
 from scipy.integrate import solve_ivp
 
 # =============================================================================
 # Stochastic solution
 # =============================================================================
 def ustochastic(alpha, beta, N):
-        """
+	"""
 	Perform the Gillespie algorithm, computing the times t at which the transitions
 	between states occur.
 	        
@@ -115,7 +117,7 @@ def stochastic_SIR():
 	plt.show()
 
 # =============================================================================
-# Execute the simulation if the script is run directly.
+# Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
     stochastic_SIR()
