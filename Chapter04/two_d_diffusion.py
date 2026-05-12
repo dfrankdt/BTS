@@ -14,6 +14,8 @@ Figures produced
 We note that the figures mirror Figures 4.5 and 4.6 in the text. Like the text,
 we do not address how those results change as a function of D, leaving that 
 instead for the exercises.
+
+Just adding this line to see
  
 This script is based on two_d_diffusion.m
 """
