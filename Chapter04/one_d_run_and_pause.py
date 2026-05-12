@@ -77,8 +77,8 @@ def one_d_run_and_pause():
 	
 	# --- Parameters for the simulation 
 	Np = 1000		# Particles
-	kon = 7			# Rate to switch on
-	koff = 8		# Rate to switch off
+	kon = 1			# Rate to switch on
+	koff = 1		# Rate to switch off
 	v = 1			# Velocity when moving
 	Tmax = 100		# Maximum time
 	Ntmax = 5000	# Maximum steps (big, just to populate arrays)
