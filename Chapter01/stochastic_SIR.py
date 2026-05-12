@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-SIR Model via Gillespie Algorithm and ODE Simulation
+SIR Model via Gillespie Algorithm 
 
 This script simulates the SIR Model through a stochastic process
 (simulated with the Gillespie algorithm) and compares results for
 cases R0 < 1 and R0 > 1
 
 Reaction:
-    S + I -> 2I  with rate alpha
+	S + I -> 2I  with rate alpha
 	I -> R with rate beta
 
 Generates figures:
@@ -22,7 +22,7 @@ Note that this code is based on stochastic_SIR.m
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
+rng = np.random.default_rng()
 
 # =============================================================================
 # Stochastic solution
@@ -56,14 +56,16 @@ def ustochastic(alpha, beta, N):
 	# -- Step forward while there is a nonzero infected population
 	while u[1] > 0:
 		if u[0] > 0:
-			R = np.random.rand(2)
+			R = rng.random(2)
 			h = np.array([alpha*u[0]*u[1], beta*u[1]])
 			dt = min(-np.log(R)/h)
 			z = np.where(-np.log(R)/h > dt, np.zeros(np.size(R)), np.ones(np.size(R)))
+
 		# -- If no susceptibles just step forward according to infected reaction
 		else:
 			dt = -np.log(R[1])/h[1]
 			z = np.array([0, 1])
+
 		t = t + dt
 		u = u + z@C
 	return u[0], t
@@ -76,43 +78,35 @@ def stochastic_SIR():
 	"""
 	Simulate stochastic SIR model via the Gillespie algorithm with values alpha
 	and beta designed to produce relative reproductive number R0 = 2.5 and R0 = 0.9
-
-	Generates figures:
-	  - Figure 1: Time to clear infection and number of infected for R0 = 2.5
-	  - Figure 2: Time to clear infection and number of infected for R0 = 0.9
   	"""
+	# --- Global Parameters
+	alpha = 1
+	N = 50
+	Ntrials = 2000
 
 	# -- Experiment 1: R0 = 2.5
-	kfig = 1
-	alpha = 1
 	beta = 20
-	N = 50
-	ktrials = 2000
-	t = np.zeros(ktrials)
-	ns = np.zeros(ktrials)
-	for k in np.arange(ktrials):
-		ns[k], t[k] = ustochastic(alpha, beta, N)
+	t1 = np.zeros(Ntrials)
+	ns1 = np.zeros(Ntrials)
+	for k in np.arange(Ntrials):
+		ns1[k], t1[k] = ustochastic(alpha, beta, N)
 
-	plt.figure(kfig)
-	plt.plot(ns, t, '.')
-	plt.xlabel('Number of Survivors')
-	plt.ylabel('Recovery Time')
+	figa, axa = plt.subplots()
+	axa.plot(ns1, t1, '.')
+	axa.set(xlabel = 'Number of Survivors', ylabel = 'Recovery Time')
+	axa.set(title = r'Survivors and Recovery Time for $R_0 = 2.5$')
 
 	# -- Experiment 2: R0 = 0.9
-	kfig = 2
-	alpha = 1
 	beta = 55
-	N = 50
-	ktrials = 2000
-	t = np.zeros(ktrials)
-	ns = np.zeros(ktrials)
-	for k in np.arange(ktrials):
-		ns[k], t[k] = ustochastic(alpha, beta, N)
+	t2 = np.zeros(Ntrials)
+	ns2 = np.zeros(Ntrials)
+	for k in np.arange(Ntrials):
+		ns2[k], t2[k] = ustochastic(alpha, beta, N)
 
-	plt.figure(kfig)
-	plt.plot(ns, t, '.')
-	plt.xlabel('Number of Survivors')
-	plt.ylabel('Recovery Time')
+	figb, axb = plt.subplots()
+	axb.plot(ns2, t2, '.')
+	axb.set(xlabel = 'Number of Survivors', ylabel = 'Recovery Time')
+	axb.set(title = r'Survivors and Recovery Time for $R_0 = 0.9$')
 
 	plt.show()
 
