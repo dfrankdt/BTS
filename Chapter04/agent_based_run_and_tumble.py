@@ -88,7 +88,7 @@ def agent_based_run_and_tumble():
 
 	t, x = xRun_Tumble(kon, koff, v, Np, Nt, dt)
 
-	# -- Plot a few trajectories -
+	# --- Plot a few trajectories 
 	fig1, ax1 = plt.subplots()
 	ax1.plot(t, x[:,:5])
 	ax1.set(xlabel = 't', ylabel = 'x', title = 'Sample Trajectories')
