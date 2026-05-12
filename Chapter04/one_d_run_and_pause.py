@@ -7,11 +7,15 @@ that switches between moving in a one dimensional line with velocity v but
 randomly switches between left moving, stationary, and right moving. 
 
 Figures produced:
-	- Figure 1: Sample Trajectory
-	- Figure 2: Mean Squared Displacement
+ - Figure 1: Sample Trajectory
+ - Figure 2: Mean Squared Displacement
 
-Note that this code is based on one_d_run_and_pause.m
+This script is based on one_d_run_and_pause.m
 """
+
+# =============================================================================
+# Packages
+# =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
 rng = np.random.default_rng()
@@ -43,7 +47,7 @@ def xtTrajectory(v, kon, koff, Tmax, Ntmax):
 	t = np.zeros( Ntmax+1 )
 	
 	kt = 0
-	# -- Each cycle: start paused, wait time to switch, random to L/R, wait time to switch
+	# --- Each cycle: start paused, wait time to switch, random to L/R, wait time to switch
 	while t[kt] < Tmax:
 		# -- One cycle
 		R = rng.uniform(0, 1, 3)
@@ -71,7 +75,7 @@ def one_d_run_and_pause():
 	Run through Np simulations, interpolate each onto uniform mesh for comparison
 	"""
 	
-	# -- Parameters for the simulation -
+	# --- Parameters for the simulation 
 	Np = 1000		# Particles
 	kon = 7			# Rate to switch on
 	koff = 8		# Rate to switch off
@@ -79,37 +83,36 @@ def one_d_run_and_pause():
 	Tmax = 100		# Maximum time
 	Ntmax = 5000	# Maximum steps (big, just to populate arrays)
 	
-	# -- Parameters for interpolating to uniform mesh -
-	nt = 2**4
-	tt = np.linspace(0, Tmax, nt+1)
-	X = np.zeros( (nt+1, Np) )
+	# --- Parameters for interpolating to uniform mesh 
+	ntt = 2**4
+	tt = np.linspace(0, Tmax, ntt+1)
+	X = np.zeros( (ntt+1, Np) )
 	
-	# -- Run through Np trajectories, compute the actual mean-squared displacement
+	# --- Run through Np trajectories, compute the actual mean-squared displacement
 	for kp in range(Np):
 		t, x = xtTrajectory(v, kon, koff, Tmax, Ntmax)
-		# -- Plot one such trajectory
+		# --- Plot one such trajectory
 		if kp == 0:
-			plt.figure(1)
-			plt.plot(t, x)
-			plt.xlabel('time')
-			plt.ylabel('x')
-		# -- Do the interpolation
+			fig1, ax1 = plt.subplots()
+			ax1.plot(t, x)
+			ax1.set(xlabel = 'time', ylabel = 'x', title = 'One-D Run and Pause')
+		# --- Do the interpolation
 		X[:, kp] = np.interp(tt, t, x)
 
-	# -- Do some statistics -
+	# --- Do some statistics 
 	Xms_actual = np.mean(X**2, 1)
 	
-	# -- We expect Deff = v^2/(koff) * (kon)/(kon + koff)
+	# --- We expect Deff = v^2/(koff) * (kon)/(kon + koff)
 	Deff = v**2/(koff) * kon/(kon + koff)
 	Xms_theory = 2*Deff*tt
 
-	# -- Plot the Mean Squared Displacement
-	plt.figure(2)
-	plt.plot(tt, Xms_theory, '--r', label='Theoretical')
-	plt.plot(tt, Xms_actual,'.k', label='Actual')
-	plt.xlabel('time')
-	plt.ylabel('Mean Squared Displacement')
+	# --- Plot the Mean Squared Displacement
+	fig2, ax2 = plt.subplots()
+	ax2.plot(tt, Xms_theory, '--r', label='Theoretical')
+	ax2.plot(tt, Xms_actual,'.b', label='Actual')
+	ax2.set(xlabel = 'time', ylabel = 'Mean Squared Displacement', title = 'One-D Run and Pause')
 	plt.legend()
+
 	plt.show()
 	
 # =============================================================================

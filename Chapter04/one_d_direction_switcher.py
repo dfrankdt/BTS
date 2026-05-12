@@ -7,15 +7,18 @@ that switches between moving in a one dimensional line with velocity v but
 randomly switches direction by an exponential process with rate constant k.
 
 Figures produced:
-	- Figure 1: Sample Trajectory
-	- Figure 2: Mean Squared Displacement (theoretical and actual)
+ - Figure 1: Sample Trajectory
+ - Figure 2: Mean Squared Displacement (theoretical and actual)
 
-Note that this code is based on one_d_direction_switcher.m
+This script is based on one_d_direction_switcher.m
 """
+
+# =============================================================================
+# Packages
+# =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
 rng = np.random.default_rng()
-
 
 # =============================================================================
 # Direction Switcher
@@ -67,45 +70,46 @@ def one_d_direction_switcher():
 	"""
 	Run through Np simulations, interpolate each onto uniform mesh for comparison
 	"""
-	
-	# -- Parameters for the simulation -
+
+	# --- Global Parameters
 	Np = 1000		# Particles
-	ks = 2			# Rate to switch
-	v = 3			# Velocity when moving
+	ks = 1			# Rate to switch
+	v = 1			# Velocity when moving
 	Tmax = 100		# Maximum time
 	Ntmax = 5000	# Maximum steps (big, just to populate arrays)
 	
-	# -- Parameters for interpolating to uniform mesh -
-	nt = 2**4
-	tt = np.linspace(0, Tmax, nt+1)
-	X = np.zeros( (nt+1, Np) )
+	# --- Parameters for interpolating to uniform mesh
+	ntt = 2**4
+	tt = np.linspace(0, Tmax, ntt+1)
+	X = np.zeros( (ntt+1, Np) )
 	
 	# -- Run through Np trajectories, compute the actual mean-squared displacement
 	for kp in range(Np):
 		t, x = xtTrajectory(v, ks, Tmax, Ntmax)
-		# -- Plot one such trajectory
+		# --- Plot one such trajectory
 		if kp == 0:
-			plt.figure(1)
-			plt.plot(t, x)
-			plt.xlabel('time')
-			plt.ylabel('x')
-		# -- Do the interpolation
+			fig1, ax1 = plt.subplots()
+			ax1.plot(t, x)
+			ax1.set(xlabel = 'time', ylabel = 'x',
+					title = 'One D Direction Switch')
+		# --- Do the interpolation
 		X[:, kp] = np.interp(tt, t, x)
 
-	# -- Do some statistics -
+	# --- Do some statistics
 	Xms_actual = np.mean(X**2, 1)
 	
-	# -- We expect Deff = v^2/(2 ks)
+	# --- We expect Deff = v^2/(2 ks)
 	Deff = v**2/(2*ks)
 	Xms_theory = 2*Deff*tt
 
-	# -- Plot the Mean Squared Displacement
-	plt.figure(2)
-	plt.plot(tt, Xms_theory, '--r', label='Theoretical')
-	plt.plot(tt, Xms_actual,'.k', label='Actual')
-	plt.xlabel('time')
-	plt.ylabel('Mean Squared Displacement')
-	plt.legend()
+	# --- Plot the Mean Squared Displacement
+	fig2, ax2 = plt.subplots()
+	ax2.plot(tt, Xms_theory, '--r', label='Theoretical')
+	ax2.plot(tt, Xms_actual,'.b', label='Actual')
+	ax2.set(xlabel = 'time', ylabel = 'Mean Squared Displacement', 
+			title = 'One D Direction Switch')
+	ax2.legend()
+
 	plt.show()
 	
 # =============================================================================
