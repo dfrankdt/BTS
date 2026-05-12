@@ -7,12 +7,15 @@ are Np particles that may be in one of three states, left moving, stationary
 or right moving.
 
 Figures produced:
-	- Figure 1: Sample trajectories
-	- Figure 2: Mean square displacement compared to theoretical
+ - Figure 1: Sample trajectories
+ - Figure 2: Mean square displacement compared to theoretical
 
 This script is based on agent_based_run_and_tumble.m
 """
 
+# =============================================================================
+# Packages
+# =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
 rng = np.random.default_rng()
@@ -75,7 +78,7 @@ def agent_based_run_and_tumble():
 	Identify the parameters needed, run the simulation, do some statistics and plotting
 	"""
 
-	# -- Parameters -
+	# --- Global Parameters
 	Np = 2000
 	Nt = 2000
 	dt = 0.025
@@ -85,27 +88,23 @@ def agent_based_run_and_tumble():
 
 	t, x = xRun_Tumble(kon, koff, v, Np, Nt, dt)
 
-
 	# -- Plot a few trajectories -
-	plt.figure(1)
-	plt.plot(t, x[:,:5])
-	plt.xlabel('t')
-	plt.ylabel('x')
-	plt.title('Sample Trajectories')
+	fig1, ax1 = plt.subplots()
+	ax1.plot(t, x[:,:5])
+	ax1.set(xlabel = 't', ylabel = 'x', title = 'Sample Trajectories')
 
-	# -- Do some statistics -
-	# -- We expect the effective diffusion coefficient Deff = v^2/(koff)*(kon/(kon + koff))
+	# --- Do some statistics 
+	# --- We expect the effective diffusion coefficient Deff = v^2/(koff)*(kon/(kon + koff))
 	Deff = v**2/(koff)*kon/(kon + koff)
 	Xms_actual = np.mean(x**2, 1)
 	Xms_theory = 2*Deff*t
 
-	# -- Plot the theoretical mean-squared displacement and some of the calculated values
-	plt.figure(2)
-	plt.plot(t, Xms_theory, '--r', label='Theoretical')
-	plt.plot(t[0:Nt+1:100], Xms_actual[0:Nt+1:100], '.k', label='Actual')
-	plt.xlabel('t')
-	plt.ylabel('Mean Square Displacement')
-	plt.legend()
+	# --- Plot the theoretical mean-squared displacement and some of the calculated values
+	fig2, ax2 = plt.subplots()
+	ax2.plot(t, Xms_theory, '--r', label='Theoretical')
+	ax2.plot(t[0:Nt+1:100], Xms_actual[0:Nt+1:100], '.k', label='Actual')
+	ax2.set(xlabel = 't', ylabel = 'Mean Square Displacement')
+	ax2.legend()
 
 	plt.show()
 	
