@@ -10,7 +10,7 @@ Figures produced:
 	- Figure 1: Sample trajectories
 	- Figure 2: Mean square displacement compared to theoretical
 
-Note that this code is based on agent_based_run_and_tumble.m
+This script is based on agent_based_run_and_tumble.m
 """
 
 import numpy as np
