@@ -3,8 +3,12 @@
 Crank-Nicolson scheme to simulate the Fisher equation. Below the simulation produces
 either a movie or a plot, depending on the comment.
 
-Note: This script is based on CN_Fisher.py.
+Note: This script is based on CN_Fisher.m
 """
+
+# =============================================================================
+#  Packages
+# =============================================================================
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,8 +18,8 @@ import matplotlib.animation as manimation
 # =============================================================================
 #  Nonlinearity
 # =============================================================================
-def F(u, k, U0):
-	y = k*u * (U0 - u)
+def F(u, alpha, U0):
+	y = alpha*u * (U0 - u)
 	return y
 # =============================================================================
 # Crank-Nicolson Method
@@ -59,12 +63,12 @@ def doCN(uinit, x, t, Du, k, U0):
 # Create Movie
 # =============================================================================
 def doMovie(x, t, U):
-	# Initialize data structures
+	# --- Initialize data structures
 	Nt = np.size(t) - 1
 	uinit = U[:,0]
 	uMax = np.max(U)
 	
-	# Initialize movie
+	# --- Initialize movie
 	fig, ax = plt.subplots()
 	p_init = ax.plot(x, uinit, '--r', label='Initial Profile')
 	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
@@ -87,20 +91,19 @@ def doMovie(x, t, U):
 # Create Plots
 # =============================================================================
 def doPlots(x, t, U, Nskip):
-        # Initialize data structures
+	# --- Initialize data structures
 	uinit = U[:,0]
-        Nt = np.size(t) - 1
+	Nt = np.size(t) - 1
 	
-	# Refocus indices to choose just some of the t values
+	# --- Refocus indices to choose just some of the t values
 	t_indices = np.arange(0, Nt+1, Nskip)
 	tk = t[ Nskip ]
 
-        fig1, ax1 = plt.subplots()
-        ax1.plot(x, U[:, t_indices])
-        ax1.set(xlabel = 'x', ylabel = 'u(x, t)', title = rf'Profiles every $\Delta t$ = {tk:1.2f} s')
+	fig1, ax1 = plt.subplots()
+	ax1.plot(x, U[:, t_indices])
+	ax1.set(xlabel = 'x', ylabel = 'u(x, t)', 
+			title = rf'Profiles every $\Delta t$ = {tk:1.2f} s')
 	plt.show()
-
-
 
 # =============================================================================
 # Main Simulation Function
@@ -108,11 +111,11 @@ def doPlots(x, t, U, Nskip):
 def CN_Fisher():
  
 	# --- Parameters 
-	L = 100
-	Tf = 10
-	Du = 1
-	k = 1
-	U0 = 4
+	L = 100		# Spatial Domain
+	Tf = 10		# End time
+	Du = 1		# Diffusion coefficient
+	alpha = 1	# Fisher rate constant 
+	U0 = 1		# Carrying capacity
 
 	# --- Spatial and Temporal Scales 
 	Nt, Nx = 2**8, 2**7
@@ -124,9 +127,8 @@ def CN_Fisher():
 	uinit = 0.002*np.exp( -(x - L/2)**2 / (L/4) )
 
         # --- Perform Crank-Nicolson
-	U = doCN(uinit, x, t, Du, k, U0)
+	U = doCN(uinit, x, t, Du, alpha, U0)
 
-		
 	# --- Create Movie 
 	# --- (comment out when producing a plot) 
 	doMovie(x, t, U)
@@ -134,7 +136,7 @@ def CN_Fisher():
 	# --- Create Plots 
 	# --- (comment out when producing a movie) 
 	# --- Nskip chooses profiles in time to plot from 0 to Nt by Nskip
-	Nskip = 2**7
+	Nskip = 2**5
 	doPlots(x, t, U, Nskip)
 
 # =============================================================================
