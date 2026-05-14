@@ -3,7 +3,7 @@
 Diffusion with Dirichlet BCs via the Method of Lines
 
 We approximate the solution of the Diffusion Equation (5.37) -- (5.38) with
-using either Dirichlet boundary conditions using the method of lines
+Dirichlet boundary conditions using the method of lines
 
 """
 
@@ -37,18 +37,18 @@ def de_rhs(t, u, alpha):
 # =============================================================================
 def diffusion_D_via_MOL():
 	# --- Global parameters
-	L = 1			# length of domain
 	D = 1			# diffusion coefficient
 	u0, uL = 0, 0	# boundary conditions
+	L = 1			# length of domain
 	Nx = 2**5		# number of partitions in x
-	dt = 0.01
-	tf = 0.5
+	tf = 0.5		# end time
+	dt = 0.01		# time step
 	
 	# --- Variables
 	x = np.linspace(0, L, Nx + 1)
 	dx = L/Nx
 	alpha = D/dx**2
-
+	Nt = int(dt/tf)
 
 # =============================================================================
 # Execute the simulation if the script is run directly
