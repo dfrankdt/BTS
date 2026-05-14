@@ -10,7 +10,7 @@ Figures produced:
  - Figure 1: 
  - Figure 2: 
  
-Note that this code is based on discrete_diffusion_via_Gillespie.m
+This script is based on discrete_diffusion_via_Gillespie.m
 """
 
 # =============================================================================
@@ -80,12 +80,11 @@ def uGillespie(M, N, Nt, alpha):
 	return t, U
 
 # =============================================================================
-# Create Movie 
+# Create animation 
 # =============================================================================
 def doMovie(x, t, U, M):
 	u0 = U[0,:]
-	N = np.size(u0)
-	Nt = np.size(U, axis=0)
+	Nt = len(t) - 1
 
 	fig, ax = plt.subplots()
 	p_update = ax.plot(x, u0/M, 'or', label='Distribution')[0]
@@ -101,7 +100,7 @@ def doMovie(x, t, U, M):
 		ax.legend(loc='upper left')
 		return(p_update)
 
-	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(Nt), interval=10)
+	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(Nt+1), interval=10)
 	plt.show()
 
 # =============================================================================
