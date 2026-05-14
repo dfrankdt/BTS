@@ -87,21 +87,17 @@ def doMovie(x, t, U):
 # Create Plots
 # =============================================================================
 def doPlots(x, t, U, Nskip):
-	# Initialize data structures
+        # Initialize data structures
 	uinit = U[:,0]
-	Nt = np.size(t) - 1
+        Nt = np.size(t) - 1
 	
 	# Refocus indices to choose just some of the t values
 	t_indices = np.arange(0, Nt+1, Nskip)
 	tk = t[ Nskip ]
-	
-	# Do the plotting
-	plt.figure(1)
-	plt.plot(x, U[:, t_indices])
-	plt.xlabel('x')
-	plt.ylabel('u(x, t)')
-	plt.title(rf'Profiles every $\Delta t$ = {tk:1.2f} s')
-	plt.grid()
+
+        fig1, ax1 = plt.subplots()
+        ax1.plot(x, U[:, t_indices])
+        ax1.set(xlabel = 'x', ylabel = 'u(x, t)', title = rf'Profiles every $\Delta t$ = {tk:1.2f} s')
 	plt.show()
 
 
@@ -111,33 +107,33 @@ def doPlots(x, t, U, Nskip):
 # =============================================================================
 def CN_Fisher():
  
-	# -- Parameters -
+	# --- Parameters 
 	L = 100
 	Tf = 10
 	Du = 1
 	k = 1
 	U0 = 4
 
-	# -- Spatial and Temporal Scales -
+	# --- Spatial and Temporal Scales 
 	Nt, Nx = 2**8, 2**7
 	dt, dx = Tf/Nt,  L/Nx
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, dt*Nt, Nt+1)
 
-	# -- Initial profile for state variable -
+	# --- Initial profile for state variable 
 	uinit = 0.002*np.exp( -(x - L/2)**2 / (L/4) )
 
-    # -- Perform Crank-Nicolson -
+        # --- Perform Crank-Nicolson
 	U = doCN(uinit, x, t, Du, k, U0)
 
 		
-	# -- Create Movie -
-	# -- (comment out when producing a plot) -
-	#doMovie(x, t, U)
+	# --- Create Movie 
+	# --- (comment out when producing a plot) 
+	doMovie(x, t, U)
 	
-	# -- Create Plots -
-	# -- (comment out when producing a movie) -
-	# -- Nskip chooses profiles in time to plot from 0 to Nt by Nskip
+	# --- Create Plots 
+	# --- (comment out when producing a movie) 
+	# --- Nskip chooses profiles in time to plot from 0 to Nt by Nskip
 	Nskip = 2**7
 	doPlots(x, t, U, Nskip)
 
