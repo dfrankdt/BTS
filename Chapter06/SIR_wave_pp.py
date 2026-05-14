@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Template
+SIR Phase Plane Wave
 
 """
 
@@ -16,7 +16,7 @@ rng = np.random.default_rng()
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
-def template():
+def SIR_wave_pp():
 
 
 
@@ -24,4 +24,4 @@ def template():
 # Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
-    template()
+    SIR_wave_pp()

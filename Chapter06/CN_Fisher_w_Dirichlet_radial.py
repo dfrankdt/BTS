@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Template
+CN Scheme to the 2D Fisher Equation (radial symmetry)
 
 """
 
@@ -16,7 +16,7 @@ rng = np.random.default_rng()
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
-def template():
+def CN_Fisher_w_Dirichlet_radial():
 
 
 
@@ -24,4 +24,4 @@ def template():
 # Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
-    template()
+    CN_Fisher_w_Dirichlet_radial()

@@ -8,8 +8,11 @@ but may interact according to S -> I with rate alpha
 Figures produced:
 	- Figure 1: Sample trajectories
 
-Note that this code is based on agent_SIR_1d.py
+This script is based on agent_SIR_1d.py
 """
+# =============================================================================
+# Packages
+# =============================================================================
 
 import numpy as np
 import matplotlib.pyplot as plt
