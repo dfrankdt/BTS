@@ -72,7 +72,7 @@ def doMovie(x, t, U):
 	fig, ax = plt.subplots()
 	p_init = ax.plot(x, uinit, '--r', label='Initial Profile')
 	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
-	ax.set(ylim=(0,uMax+1))
+	ax.set(ylim=(0, 1))
 	ax.set(xlabel='x', ylabel='u(x, t)')
 	ax.legend(loc='upper left')
 
@@ -103,6 +103,13 @@ def doPlots(x, t, U, Nskip):
 	ax1.plot(x, U[:, t_indices])
 	ax1.set(xlabel = 'x', ylabel = 'u(x, t)', 
 			title = rf'Profiles every $\Delta t$ = {tk:1.2f} s')
+
+	# --- Level set
+	[T, X] = np.meshgrid(t, x)
+	levels = [.5]
+	fig2, ax2 = plt.subplots()
+	ax2.contour(T, X, U, levels)
+
 	plt.show()
 
 # =============================================================================
@@ -112,13 +119,13 @@ def CN_Fisher():
  
 	# --- Parameters 
 	L = 100		# Spatial Domain
-	Tf = 10		# End time
+	Tf = 40		# End time
 	Du = 1		# Diffusion coefficient
 	alpha = 1	# Fisher rate constant 
 	U0 = 1		# Carrying capacity
 
 	# --- Spatial and Temporal Scales 
-	Nt, Nx = 2**8, 2**7
+	Nt, Nx = 2**10, 2**7
 	dt, dx = Tf/Nt,  L/Nx
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, dt*Nt, Nt+1)
@@ -126,7 +133,7 @@ def CN_Fisher():
 	# --- Initial profile for state variable 
 	uinit = 0.002*np.exp( -(x - L/2)**2 / (L/4) )
 
-        # --- Perform Crank-Nicolson
+	# --- Perform Crank-Nicolson
 	U = doCN(uinit, x, t, Du, alpha, U0)
 
 	# --- Create Movie 

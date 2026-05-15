@@ -93,7 +93,7 @@ def doMovie(x, t, U):
 # =============================================================================
 def CN_Fisher_w_Dirichlet():
 	# --- Global Parameter
-	L = 2
+	L = 5
 	D = 1
 
 	# -- Spatial and Temporal Scales
@@ -111,7 +111,6 @@ def CN_Fisher_w_Dirichlet():
 	U = doCN(u0, x, t)
 
 	doMovie(x, t, U)
-
 
 # =============================================================================
 # Execute the simulation if the script is run directly
