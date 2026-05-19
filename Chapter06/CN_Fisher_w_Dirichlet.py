@@ -8,7 +8,11 @@ different values of L.
 
 Notes
  - fix the initial profile
- - fine tune dt, dx 
+ - create snapshots
+ - fine tune dt, dx
+ - reread .m code
+ 
+This script is based on CN_Fisher_w_Dirichlet.m 
 """
 
 # =============================================================================
@@ -84,7 +88,7 @@ def doMovie(x, t, U):
 		return(p_update)
         
 	ani = manimation.FuncAnimation(fig=fig, func=update, 
-	frames=range(0, Nt+1), interval=100)
+	frames=range(0, Nt+1), interval=10)
 
 	plt.show()
 
@@ -93,20 +97,18 @@ def doMovie(x, t, U):
 # =============================================================================
 def CN_Fisher_w_Dirichlet():
 	# --- Global Parameter
-	L = 5
+	L = 2
 	D = 1
 
 	# -- Spatial and Temporal Scales
-	Nt, Nx = 2**8, 2**8
+	Nt, Nx = 2**10, 2**8
 	dt, dx = 0.002,  L/Nx
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, dt*Nt, Nt+1)
 
 	# -- Initial profile and array for state variable
 	u0 = np.tanh(x/(L/25)) * np.tanh(-(x - L)/(L/25))
-	#u0 = (1 + np.tanh( (x - L/2)/(L/25) ))*(1 + np.tanh(-(x - L/2))/(L/25))/16
-	#u0[0] = 0
-	#u0[-1] = 0
+	u0 = (1 + np.tanh( (x - L/2)/(L/25) ))*(1 + np.tanh(-(x - L/2)/(L/25)))/8
 
 	U = doCN(u0, x, t)
 
@@ -116,7 +118,7 @@ def CN_Fisher_w_Dirichlet():
 # Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
-        CN_Fisher_w_Dirichlet()
+	CN_Fisher_w_Dirichlet()
 
 
 
