@@ -104,7 +104,7 @@ def doFigFour(rho, sig, g):
 # =============================================================================
 def facilitated_diff_plots():
 	# --- Global parameters
-	rho = 15
+	rho = 10
 	s0, sL = 2, 0.1
 	sigma = np.linspace(0, 20, 2**8+1)
 
