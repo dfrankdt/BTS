@@ -7,9 +7,9 @@ decay to a "dead" state, in which the particle no longer moves.
 We collect the locations where particles "die".
 
 Figures produced:
-	- Figure 1: Histogram of location after decay with theoretical value
+ - Figure 1: Histogram of location after decay with theoretical value
  
-Note that this code is based on decay_probability.m
+This script is based on decay_probability.m
 """
 
 import numpy as np
@@ -21,8 +21,9 @@ rng = np.random.default_rng()
 # =============================================================================
 def diff_decay(D, alpha, dt, Np):
 	"""
-	When a particle moves, it does so according to a variance 2 D dt. At each time
-	step, a particle may decay.
+	When a particle moves, it does so according to a variance 2 D dt. 
+	At each time step, a particle may decay. If so, we mark that location
+	and go again.
 	
 	Inputs:
 		D (float): Diffusion coefficient
@@ -54,28 +55,27 @@ def decay_probability():
 	that simulation and do some statistics and plotting of the result.
 	"""
 	
-	# -- Parameters -
+	# --- Parameters
 	D = 1		# Diffusion coefficient
 	alpha = 1	# Decay rate
 	dt = 1e-4	# Time step
 	Np = 1000	# Number of particles
 	
-	# -- Get distribution
+	# --- Get distribution
 	X = diff_decay(D, alpha, dt, Np)
 	
-	# -- Statistics -
+	# --- Statistics 
 	Xdist, bins = np.histogram(X, bins='auto', density=True)
 
-	# -- Theoretical Distribution -
+	# --- Theoretical Distribution
 	x = np.linspace(-8, 8 , 2**8+1)
-	p = np.sqrt(alpha/D)*np.exp(-np.sqrt(alpha/D)*np.abs(x))/2
+	p = (1/2) * np.sqrt(alpha/D) * np.exp(-np.sqrt(alpha/D)*np.abs(x))
 
-	# -- Plotting -
-	plt.figure(1)
-	plt.stairs(Xdist, bins, fill=True)
-	plt.plot(x, p, '--r')
-	plt.xlabel('x')
-	plt.ylabel('Distribution')
+	# --- Plotting
+	fig, ax = plt.subplots()
+	ax.stairs(Xdist, bins, fill=True)
+	ax.plot(x, p, '--r')
+	ax.set(xlabel = 'x', ylabel = 'Distribution')
 	plt.show()
 	
 # =============================================================================
