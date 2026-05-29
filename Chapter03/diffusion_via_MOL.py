@@ -24,15 +24,12 @@ import matplotlib.animation as manimation
 # Right-hand Side of the Differential Equation
 # =============================================================================
 def de_rhs(t, u, alpha):
-	Nu = len(u)
-	sc = 2*np.ones(Nu)
-	sc[0] = 1
-	sc[-1] = 1
-	sp = np.zeros(Nu)
-	sp[1:] = u[:Nu-1]
-	sm = np.zeros(Nu)
-	sm[:-1] = u[1:Nu]
-	d2u = -sc*u + sp + sm
+	N = len(u)-1
+	
+	d2u = np.zeros(N+1)
+	d2u[1:N] = u[0:N-1] - 2*u[1:N] + u[2:N+1]
+	d2u[0] = -2*u[0] + 2*u[1]
+	d2u[-1] = 2*u[-2] - 2*u[-1]
 	du = alpha*( d2u )
 	return du
 
@@ -43,10 +40,14 @@ def doMovie(x, t, U):
 	# --- Initialize data structures
 	Nt = len(t) - 1
 	uinit = U[:,0]
+	
+	# --- Steady State
+	uss = max(uinit)/(len(x) - 1)*np.ones(len(x))
 
 	# --- Initialize movie
 	fig, ax = plt.subplots()
 	p_init = ax.plot(x, uinit, '.r', label='Initial Profile')
+	p_ss = ax.plot(x, uss, '--y', label='Steady State')
 	p_update = ax.plot([], [], '.b', label='Time Evolution')[0]
 	ax.set(xlabel='n', ylabel='u(n, t)')
 	ax.legend(loc='upper right')
@@ -79,9 +80,9 @@ def diffusion_via_MOL():
 	soln = solve_ivp(de_rhs, [0, tf], uinit, args=[alpha], dense_output=True)
 
 	# --- Structure to produce visualization
+	x = np.arange(N)
 	t = np.linspace(0, tf, Nt+1)
 	U = soln.sol(t)
-	x = np.arange(N)
 	doMovie(x, t, U)
 
 # =============================================================================
