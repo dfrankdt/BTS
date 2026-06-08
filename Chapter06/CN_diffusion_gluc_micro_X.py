@@ -111,9 +111,9 @@ def doMovie(x, t, U, G):
 	p2_init = ax2.plot(x, g0, '--r', label='Initial Profile, g')
 	p1_update = ax1.plot([], [], 'b', label='Time Evolution')[0]
 	p2_update = ax2.plot([], [], 'g', label='Time Evolution')[0]
-	ax1.set(ylabel='u(x, t)', ylim=(0,1))
+	ax1.set(ylabel=r'$u(x, t)$', ylim=(0,1))
 	ax1.legend(loc='upper left')
-	ax2.set(xlabel = 'x', ylabel = 'g(x, t)', ylim=(0,1))
+	ax2.set(xlabel = 'x', ylabel = r'$g(x, t)$', ylim=(0,1))
 	ax2.legend(loc='upper left')
 
 	def update(frame):
