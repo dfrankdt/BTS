@@ -2,6 +2,15 @@
 """
 CN Scheme to the RD Equation with SIR Dynamics
 
+We solve the system
+
+ s_t = - su 
+ u_t = su + eta u + u_xx
+ 
+described in equations (6.100) - (6.101) where s represents the dimensionless
+susceptible population and u represents the dimensionless infected population.
+The relevant dimensionless parameter is eta
+
 """
 
 # =============================================================================
@@ -14,41 +23,101 @@ import matplotlib.animation as manimation
 # =============================================================================
 #  Nonlinearity
 # =============================================================================
-def F(u, v, alpha):
+def F(s, u, alpha):
 	# -- Reaction term for the RD Equation
-	y = alpha * u * v
+	y = alpha * s * u
 	return y
 
 # =============================================================================
 # Crank-Nicolson Method
 # =============================================================================
-def doCN():
+def doCN(s0, u0, x, t, D, eta, r):
+	dx = x[1] - x[0]
+	dt = t[1] - t[0]
+	Nx = len(x) - 1
+	Nt = len(t) - 1
+	
+	gam = D*dt/(2*dx**2)
+	D2 = -2*np.eye(Nx+1)
+	D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
+	Acn = np.eye(Nx+1) - gam*D2
+	Bcn = np.eye(Nx+1) + gam*D2
+	
+	S = np.zeros( (Nx+1, Nt+1) )
+	U = np.zeros( (Nx+1, Nt+1) )
+	S[:,0] = s0
+	U[:,0] = u0
+	
+	sk = s0
+	uk = u0
+	for kt in range(Nt):
+		y = Bcn@uk + dt * (F(sk, uk, r) - eta*uk)
+		skp1 = sk - dt*(F(sk, uk, r))
+		ukp1 = np.linalg.solve(Acn, y)
+		S[:, kt+1] = skp1
+		U[:, kt+1] = ukp1
+		sk = skp1
+		uk = ukp1
+	return S, U
+		
 
 # =============================================================================
 # Create Movie
 # =============================================================================
-def doMovie():
+def doMovie(x, t, S, U):
+	s0 = S[:,0]
+	u0 = U[:,0]
+	Nt = len(t) - 1
+	
+	# Initialize movie
+	fig, (ax1, ax2) = plt.subplots(2, 1)
+	p1_init = ax1.plot(x, u0, '--b', label='Initial Profile')
+	p2_init = ax2.plot(x, s0, '--b', label='Initial Profile')
+	p1_update = ax1.plot([], [], 'r', label='Time Evolution')[0]
+	p2_update = ax2.plot([], [], 'g', label='Time Evolution')[0]
+	ax1.set(ylabel=r'$u(\xi, \tau)$')#, ylim=(0,1))
+	ax1.legend(loc='upper left')
+	ax2.set(xlabel = r'$\xi$', ylabel = r'$\sigma(\xi, \tau)$')#, ylim=(0,1))
+	ax2.legend(loc='upper left')
+
+	def update(frame):
+		tk = t[frame]
+		u = U[:, frame]
+		s = S[:, frame]
+		p1_update.set_xdata(x)
+		p1_update.set_ydata(u)
+		p2_update.set_xdata(x)
+		p2_update.set_ydata(s)
+		ax1.set(title=f'Time t = {tk:.2f} s')
+		return(p1_update, p2_update)
+        
+	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(Nt+1), interval=100)
+	plt.show()
 
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
 def CN_diffusion_SIR():
 	# --- Parameters
-	D = 1
+	D = .1
 	r = 0.1
 	eta = 0.5
 	L = 80
 
 	# --- Spatial and Temporal Scales
-	tend = 1
-	Nt, Nx = 2**4, 2**8
+	tend = 10
+	Nt, Nx = 2**8, 2**8
 	dt, dx = tend/Nt,  L/Nx
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, tend, Nt+1)
 
 	# --- Initial Profile
-	uinit = 0.1 * np.sech(2*(x - L/2))**2
-	vinit = 1 - unit
+	uinit = 0.1 / np.cosh(2*(x - L/2))**2
+	sinit = 1 - uinit
+	
+	# --- Solve and animate
+	S, U = doCN(sinit, uinit, x, t, D, eta, r)
+	doMovie(x, t, S, U)
 
 # =============================================================================
 # Execute the simulation if the script is run directly
