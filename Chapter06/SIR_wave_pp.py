@@ -14,10 +14,29 @@ import matplotlib.animation as manimation
 rng = np.random.default_rng()
 
 # =============================================================================
+# DE RHS
+# =============================================================================
+def de_rhs(t, y, c, eta):
+	u, s = y
+	ds = 1/c*s*u
+	du = c*(1 + eta*np.log(s) - s - u)
+	dy = np.array([ds, du])
+	return dy
+
+# =============================================================================
 # Main Simulation Function
 # =============================================================================
 def SIR_wave_pp():
-
+	# --- Parameters
+	eta = 0.47
+	
+	# --- Plotting
+	snc = np.linspace(0.1, 1.1, 2**8+1)
+	unc = 1 + eta*np.log(snc) - snc
+	fig, ax = plt.subplots()
+	ax.plot([0, 1], [0, 0], 'ok')
+	ax.plot(snc, unc, '--r')	
+	plt.show()
 
 
 # =============================================================================

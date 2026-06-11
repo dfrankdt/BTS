@@ -40,6 +40,8 @@ def doCN(s0, u0, x, t, D, eta, r):
 	gam = D*dt/(2*dx**2)
 	D2 = -2*np.eye(Nx+1)
 	D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
+	D2[0,0] = -1
+	D2[-1, -1] = -1
 	Acn = np.eye(Nx+1) - gam*D2
 	Bcn = np.eye(Nx+1) + gam*D2
 	
@@ -64,7 +66,7 @@ def doCN(s0, u0, x, t, D, eta, r):
 # =============================================================================
 # Create Movie
 # =============================================================================
-def doMovie(x, t, S, U):
+def doMovie(x, t, S, U, ktskip):
 	s0 = S[:,0]
 	u0 = U[:,0]
 	Nt = len(t) - 1
@@ -75,9 +77,9 @@ def doMovie(x, t, S, U):
 	p2_init = ax2.plot(x, s0, '--b', label='Initial Profile')
 	p1_update = ax1.plot([], [], 'r', label='Time Evolution')[0]
 	p2_update = ax2.plot([], [], 'g', label='Time Evolution')[0]
-	ax1.set(ylabel=r'$u(\xi, \tau)$')#, ylim=(0,1))
+	ax1.set(ylabel=r'$u(\xi, \tau)$', ylim=(0,1))
 	ax1.legend(loc='upper left')
-	ax2.set(xlabel = r'$\xi$', ylabel = r'$\sigma(\xi, \tau)$')#, ylim=(0,1))
+	ax2.set(xlabel = r'$\xi$', ylabel = r'$\sigma(\xi, \tau)$', ylim=(0,1))
 	ax2.legend(loc='upper left')
 
 	def update(frame):
@@ -91,7 +93,7 @@ def doMovie(x, t, S, U):
 		ax1.set(title=f'Time t = {tk:.2f} s')
 		return(p1_update, p2_update)
         
-	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(Nt+1), interval=100)
+	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(0,Nt+1, ktskip), interval=100)
 	plt.show()
 
 # =============================================================================
@@ -99,14 +101,14 @@ def doMovie(x, t, S, U):
 # =============================================================================
 def CN_diffusion_SIR():
 	# --- Parameters
-	D = .1
-	r = 0.1
+	D = 1
+	r = 1
 	eta = 0.5
 	L = 80
 
 	# --- Spatial and Temporal Scales
-	tend = 10
-	Nt, Nx = 2**8, 2**8
+	tend = 60
+	Nt, Nx = 2**8, 2**7
 	dt, dx = tend/Nt,  L/Nx
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, tend, Nt+1)
@@ -117,7 +119,7 @@ def CN_diffusion_SIR():
 	
 	# --- Solve and animate
 	S, U = doCN(sinit, uinit, x, t, D, eta, r)
-	doMovie(x, t, S, U)
+	doMovie(x, t, S, U, 2**3)
 
 # =============================================================================
 # Execute the simulation if the script is run directly
