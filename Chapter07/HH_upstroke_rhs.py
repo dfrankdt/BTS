@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Template:
+Hodgkin Huxley Upstroke
+
+We illustrate bistability of the Hodgkin-Huxley equations by plotting the 
+right-hand side.
 
 """
 
@@ -9,19 +12,18 @@ Template:
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
-import matplotlib.animation as manimation
-rng = np.random.default_rng()
 
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
-def template():
-
+def HH_upstroke_rhs():
+	Vmin, Vmax = -20, 120
+	gNAbar = 120
+	
 
 
 # =============================================================================
 # Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
-    template()
+    HH_upstroke_rhs()

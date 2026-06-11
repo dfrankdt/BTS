@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-Template:
+CICR: Calcium induced calcium release
+
+Bistability in CICR
 
 """
 
@@ -9,19 +11,25 @@ Template:
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
-import matplotlib.animation as manimation
-rng = np.random.default_rng()
 
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
-def template():
+def calcium_CICR_rhs():
+	# --- Global Parameters
+	Vp = 0.9
+	kf = 1.1
+	ct = 2
+	K1 = 0.1
+	K2 = 0.08
+	gm = 5.5
+	Kp = 0.1
 
+	p_list = np.array([0.12, 0.15, 0.2])
 
 
 # =============================================================================
 # Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
-    template()
+    calcium_CICR_rhs()
