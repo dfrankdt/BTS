@@ -57,7 +57,6 @@ def doMovie(x, t, U):
 	fig, ax = plt.subplots()
 	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
 	p_init = ax.plot(x, u0, '--r', label='Initial Profile')
-	ax.set(ylim=(0,1))
 	ax.set(xlabel='x', ylabel='u(x, t)')
 	ax.legend(loc='upper left')
 

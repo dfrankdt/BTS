@@ -2,6 +2,15 @@
 """
 Diffusion with Neumann or Robin BCs via Crank-Nicolson
 
+We find a numerical solution to the BVP
+
+ u_t = D u_xx
+ Du_x = delta_0(u - u0) at x=0
+ -Du_x = deltaL(u - uL) at x=L
+
+where the nonhomogenous boundary conditions are given as in equation (5.23).
+
+TO DO: Adjust figsize and zlim
 """
 
 # =============================================================================
@@ -9,19 +18,20 @@ Diffusion with Neumann or Robin BCs via Crank-Nicolson
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import matplotlib.animation as manimation
 
 # =============================================================================
 # Crank-Nicolson
 # =============================================================================
-def doCN(u0, x, t, D, BC0, BCL):
+def doCN(uinit, x, t, D, BC0, BCL):
 	dx = x[1] - x[0]
 	dt = t[1] - t[0]
 	Nx = len(x) - 1
 	Nt = len(t) - 1
 	
-	del0, J0 = BC0
-	delL, JL = BCL
+	del0, u0 = BC0
+	delL, uL = BCL
 	
 	# --- Second difference operator, adjusted for BC
 	D2 = -2*np.eye(Nx+1)
@@ -33,8 +43,8 @@ def doCN(u0, x, t, D, BC0, BCL):
 	
 	# --- Nonhomogenous BC
 	zbc = np.zeros(Nx+1)
-	zbc[0] = 2*dx/D*J0
-	zbc[-1] = 2*dx/D*JL
+	zbc[0] = (2*dx/D) * (del0*u0)
+	zbc[-1] = (2*dx/D) * (delL*uL)
 	
 	# --- CN Split
 	gam = D*dt/(dx**2)
@@ -43,9 +53,9 @@ def doCN(u0, x, t, D, BC0, BCL):
 	
 	# --- Initialization
 	U = np.zeros( (Nx+1, Nt+1) )
-	U[:,0] = u0
+	U[:,0] = uinit
 	
-	uk = u0
+	uk = uinit
 	for kt in range(Nt):
 		y = Bcn@uk + dt*zbc
 		ukp1 = np.linalg.solve(Acn, y)
@@ -73,7 +83,7 @@ def doMovie(x, t, U):
 		u = U[:, frame]
 		p_update.set_xdata(x)
 		p_update.set_ydata(u)
-		ax.set(title=f'Time t = {tk:.2f} s')
+		ax.set(title=f'Time t = {tk:.3f} s')
 		return(p_update)
 
 	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(0, Nt+1), interval=100)
@@ -85,27 +95,47 @@ def doMovie(x, t, U):
 # =============================================================================
 def CN_Diffusion_NR():
 	# --- Parameters
-	D = .1
+	D = 1
 	L = 1
-	tend = 1
+	tend = 0.04
 		
 	# --- Discretizations
-	Nt, Nx = 250, 2**6
+	Nt, Nx = 250, 2**8
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, tend, Nt+1)
 	dt, dx = tend/Nt, L/Nx
 
 	# --- Boundary Conditions
-	del0, J0 = 1, 1	# For Robin -Du_x + del0 u0 = J0
-	delL, JL = 5, 5 # For Robin  Du_x + delL uN = JL
-	BC0 = np.array([del0, J0])
-	BCL = np.array([delL, JL])
+	del0, u0 = 0, 0	# For Robin -Du_x + del0 u = del0 u0 at x = 0
+	delL, uL = 0, 0 # For Robin  Du_x + delL u = delL uL at x = L
+	BC0 = np.array([del0, u0])
+	BCL = np.array([delL, uL])
 	
-	# --- Initialization
-	uinit = 1.5*np.cos(np.pi*(x - L/2))*np.cos(20*np.pi*x)
+	# --- Initialization and surface u(x, t)
+	uinit = 1.5*np.cos(np.pi*(x - L/2))
+	U_plt_a = doCN(uinit, x, t, D, BC0, BCL)
+	
+	uinit = 1.5*np.cos(np.pi*(x - L/2)) + 1.5*np.cos(20*np.pi*x)
+	U_plt_b = doCN(uinit, x, t, D, BC0, BCL)
+	
+	T, X = np.meshgrid(t, x)
+	fig1, (axa, axb) = plt.subplots(1, 2, 
+		figsize=(12.8, 4.8),
+		subplot_kw={"projection": "3d"})
+	axa.plot_surface(X, T, U_plt_a, cmap="coolwarm")
+	axa.set(zlim=(-1, 2))
+	axb.plot_surface(X, T, U_plt_b, cmap="coolwarm")
+	axb.set(zlim=(-1, 2))
+	plt.show()
+
+
+	# --- Initialization and animation
 	uinit = 1.5*np.exp(-(x - L/2)**2/(2*dx))
 	U = doCN(uinit, x, t, D, BC0, BCL)
 	doMovie(x, t, U)
+
+	
+	
 	
 # =============================================================================
 # Execute the simulation if the script is run directly

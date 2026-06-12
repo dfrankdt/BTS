@@ -4,11 +4,9 @@ Diffusion with Dirichlet BCs via the Method of Lines
 
 We approximate the solution of the Diffusion Equation (5.37) -- (5.38) with
 Dirichlet boundary conditions using the method of lines. We discretize the
-spatial region into N subintervals (N+1 endpoints) and consisder the N-1
-interior points.
-
-With zero Dirichlet conditions, the boundary points are fixed and we need only
-solve the IVP on the interior points.
+spatial region into N subintervals.  For the  N-1 interior points, we create
+the second difference operator. For the two boundary points, we set the RHS
+of the ODE to be zero.
 
 """
 
@@ -23,26 +21,26 @@ import matplotlib.animation as manimation
 # =============================================================================
 # DE RHS
 # =============================================================================
-def de_rhs(t, u, alpha, u0, uL):
+def de_rhs(t, u, alpha):
 	N = len(u)-1
 	d2u = np.zeros(N+1)
 	d2u[1:N] = u[0:N-1] - 2*u[1:N] + u[2:N+1]
-	d2u[0] = u0 - 2*u[0] + u[1]
-	d2u[-1] = u[-2] - 2*u[-1] + uL
+	d2u[0] = 0
+	d2u[-1] = 0
 	du = alpha*d2u
 	return du
 
 # =============================================================================
 # Animation
 # =============================================================================
-def doMovie(x, t, U):
+def doMovie(x, t, U, ktskip):
 	# --- Initialize data structures
-	Nt = len(t) - 1
 	uinit = U[:,0]
+	Nt = len(t) - 1
 		
 	# --- Initialize movie
 	fig, ax = plt.subplots()
-	p_init = ax.plot(x, uinit, '-r', label='Initial Profile')
+	p_init = ax.plot(x, uinit, '--r', label='Initial Profile')
 	p_update = ax.plot([], [], '-b', label='Time Evolution')[0]
 	ax.set(xlabel='x', ylabel='u(x, t)')
 	ax.legend(loc='upper right')
@@ -56,7 +54,8 @@ def doMovie(x, t, U):
 		ax.set(title=f'Time t = {tk:.2f} s')
 		return(p_update)
 
-	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(Nt + 1), interval=100)
+	ani = manimation.FuncAnimation(fig=fig, func=update, 
+		frames=range(0, Nt+1, ktskip), interval=100)
 	plt.show()
 
 # =============================================================================
@@ -64,36 +63,33 @@ def doMovie(x, t, U):
 # =============================================================================
 def MOL_diffusion_D():
 	# --- Global parameters
-	D = 1			# diffusion coefficient
 	L = 1			# length of domain
-	Nx = 2**6		# number of partitions in x
-	tf = 0.5		# end time
-	dt = 0.01		# time step
+	D = .1			# diffusion coefficient
+	u0, uL = 0, 0	# Dirichlet Conditions
 
-	# --- Boundary Conditions
-	u0, uL = 0, 0	        # Dirichlet Conditions
-
-	# --- Variables
-	x = np.linspace(0, L, Nx + 1)
+	# --- Discretization
+	Nt, Nx = 2**8, 2**6
 	dx = L/Nx
-	Nt = int(tf/dt)
+	dt = 0.001
+	tf = dt*Nt
+	x = np.linspace(0, L, Nx + 1)
 	t = np.linspace(0, tf, Nt + 1)
-	alpha = D/dx**2
-	U = np.zeros( (Nx+1, Nt+1) )
-	U[0, 1:] = u0*np.ones(Nt)
-	U[-1, 1:] = uL*np.ones(Nt)
 
 	# --- Initial profile (Gaussian)
-	x_interior = x[1:Nx]
-	uinit = np.exp(- (x_interior - L/2)**2/(2*dx) )
+	uinit = np.exp(- (x - L/2)**2/(2*dx) )
+	uinit[0] = u0
+	uinit[-1] = uL
 
-	# --- Solve the IVP on the interior points
-	soln = solve_ivp(de_rhs, [0, tf], uinit, args=[alpha, u0, uL], dense_output=True)
-	U[1:Nx,:] = soln.sol(t)
+	# --- Initialization
+	alpha = D/dx**2
+	U = np.zeros( (Nx+1, Nt+1) )
+
+	# --- Solve the IVP
+	soln = solve_ivp(de_rhs, [0, tf], uinit, args=[alpha], dense_output=True)
+	U = soln.sol(t)
 
 	# --- Animation
-	doMovie(x, t, U)
-    
+	doMovie(x, t, U, 2**3)
 
 # =============================================================================
 # Execute the simulation if the script is run directly
