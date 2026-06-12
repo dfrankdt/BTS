@@ -20,9 +20,10 @@ def doCN(u0, x, t, D, BC0, BCL):
 	Nx = len(x) - 1
 	Nt = len(t) - 1
 	
-	del0, U0 = BC0
-	delL, UL = BCL
+	del0, J0 = BC0
+	delL, JL = BCL
 	
+	# --- Second difference operator, adjusted for BC
 	D2 = -2*np.eye(Nx+1)
 	D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
 	D2[0, 0] = -2*dx/D*del0 - 2
@@ -30,14 +31,17 @@ def doCN(u0, x, t, D, BC0, BCL):
 	D2[-1, -2] = 2
 	D2[-1, -1] = -2*dx/D*delL - 2
 	
+	# --- Nonhomogenous BC
 	zbc = np.zeros(Nx+1)
-	zbc[0] = 2*dx/D*U0
-	zbc[-1] = 2*dx/D*UL
+	zbc[0] = 2*dx/D*J0
+	zbc[-1] = 2*dx/D*JL
 	
-	gam = D*dt/(2*dx**2)
-	Acn = np.eye(Nx+1) - gam*D2
-	Bcn = np.eye(Nx+1) + gam*D2
+	# --- CN Split
+	gam = D*dt/(dx**2)
+	Acn = np.eye(Nx+1) - gam/2*D2
+	Bcn = np.eye(Nx+1) + gam/2*D2
 	
+	# --- Initialization
 	U = np.zeros( (Nx+1, Nt+1) )
 	U[:,0] = u0
 	
@@ -63,6 +67,7 @@ def doMovie(x, t, U):
 	ax.set(xlabel = 'x', ylabel = 'u(x, t)')
 	ax.legend(loc = 'upper left')
 	
+	# --- Update
 	def update(frame):
 		tk = t[frame]
 		u = U[:, frame]
@@ -82,23 +87,23 @@ def CN_Diffusion_NR():
 	# --- Parameters
 	D = .1
 	L = 1
-	tend = 2
+	tend = 1
 		
 	# --- Discretizations
-	Nt, Nx = 2**5, 2**8
+	Nt, Nx = 250, 2**6
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, tend, Nt+1)
 	dt, dx = tend/Nt, L/Nx
 
 	# --- Boundary Conditions
-	del0, U0 = 3, 1	# For Robin -Du_x + del0 u0 = U0
-	delL, UL = 2, 1 # For Robin  Du_x + delL uN = UL
-	BC0 = np.array([del0, U0])
-	BCL = np.array([delL, UL])
+	del0, J0 = 1, 1	# For Robin -Du_x + del0 u0 = J0
+	delL, JL = 5, 5 # For Robin  Du_x + delL uN = JL
+	BC0 = np.array([del0, J0])
+	BCL = np.array([delL, JL])
 	
 	# --- Initialization
 	uinit = 1.5*np.cos(np.pi*(x - L/2))*np.cos(20*np.pi*x)
-#	uinit = 1.5*np.exp(-(x - L/2)**2/(2*dx))
+	uinit = 1.5*np.exp(-(x - L/2)**2/(2*dx))
 	U = doCN(uinit, x, t, D, BC0, BCL)
 	doMovie(x, t, U)
 	
