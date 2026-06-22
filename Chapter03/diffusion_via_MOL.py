@@ -26,12 +26,15 @@ import matplotlib.animation as manimation
 def de_rhs(t, u, alpha):
 	N = len(u)-1
 	
-	d2u = np.zeros(N+1)
-	d2u[1:N] = u[0:N-1] - 2*u[1:N] + u[2:N+1]
-	d2u[0] = -2*u[0] + 2*u[1]
-	d2u[-1] = 2*u[-2] - 2*u[-1]
-	du = alpha*( d2u )
-	return du
+	# --- Second difference operator	
+	D2u = np.zeros(N+1)
+	D2u[1:N] = u[0:N-1] - 2*u[1:N] + u[2:N+1]
+	
+	# --- No flux boundary conditions
+	D2u[0] = -2*u[0] + 2*u[1]
+	D2u[-1] = 2*u[-2] - 2*u[-1]
+	dudt = alpha*( D2u )
+	return dudt
 
 # =============================================================================
 # Create Movie
