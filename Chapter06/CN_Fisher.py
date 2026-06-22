@@ -18,17 +18,17 @@ import matplotlib.animation as manimation
 # =============================================================================
 #  Nonlinearity
 # =============================================================================
-def F(u, alpha, U0):
-	y = alpha*u * (U0 - u)
+def F(u, r, K):
+	y = r*u * (K - u)
 	return y
 # =============================================================================
 # Crank-Nicolson Method
 # =============================================================================
-def doCN(uinit, x, t, Du, k, U0):
+def doCN(uinit, x, t, Du, r, K):
 	""" 
 	Crank-Nicolson to simulate the Fisher Equation
 		
-		u_t = Du u_xx + k u (U0 - u)
+		u_t = Du u_xx + r u (K - u)
 		
 	with no-flux boundary conditions.
 	"""
@@ -53,7 +53,7 @@ def doCN(uinit, x, t, Du, k, U0):
 	# -- Initialization of CN method
 	uk = uinit
 	for kt in range(Nt):
-		y = Bcn@uk + dt*F(uk, k, U0)
+		y = Bcn@uk + dt*F(uk, r, K)
 		ukp1 = np.linalg.solve(Acn, y)
 		uk = ukp1
 		U[:,kt+1] = ukp1
@@ -121,8 +121,8 @@ def CN_Fisher():
 	L = 100		# Spatial Domain
 	Tf = 40		# End time
 	Du = 1		# Diffusion coefficient
-	alpha = 1	# Fisher rate constant 
-	U0 = 1		# Carrying capacity
+	r = 1		# Fisher rate constant 
+	K = 1		# Carrying capacity
 
 	# --- Spatial and Temporal Scales 
 	Nt, Nx = 2**10, 2**7
@@ -134,7 +134,7 @@ def CN_Fisher():
 	uinit = 0.002*np.exp( -(x - L/2)**2 / (L/4) )
 
 	# --- Perform Crank-Nicolson
-	U = doCN(uinit, x, t, Du, alpha, U0)
+	U = doCN(uinit, x, t, Du, r, K)
 
 	# --- Create Movie 
 	# --- (comment out when producing a plot) 
