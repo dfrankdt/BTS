@@ -2,6 +2,9 @@
 """
 Diffusion with Neumann or Robin BCs via Crank-Nicolson
 
+We approximate the solution of the Diffusion Equation (5.37) -- (5.38) with
+using either Neumann or Robin boundary conditions using Crank-Nicolson
+
 We find a numerical solution to the BVP
 
  u_t = D u_xx
@@ -41,23 +44,25 @@ def doCN(uinit, x, t, D, BC0, BCL):
 	D2[-1, -2] = 2
 	D2[-1, -1] = -2*dx/D*delL - 2
 	
-	# --- Nonhomogenous BC
-	zbc = np.zeros(Nx+1)
-	zbc[0] = (2*dx/D) * (del0*U0)
-	zbc[-1] = (2*dx/D) * (delL*UL)
-	
 	# --- CN Split
 	gam = D*dt/(dx**2)
 	Acn = np.eye(Nx+1) - gam/2*D2
 	Bcn = np.eye(Nx+1) + gam/2*D2
+
+	# --- Nonhomogenous BC
+	zbc = np.zeros(Nx+1)
+	zbc[0] = (2*dx/D) * (del0*U0)
+	zbc[-1] = (2*dx/D) * (delL*UL)
+	zbc = gam*zbc
 	
 	# --- Initialization
 	U = np.zeros( (Nx+1, Nt+1) )
-	U[:,0] = uinit
-	
+	U[:, 0] = uinit
+
+	# --- Steps
 	uk = uinit
 	for kt in range(Nt):
-		y = Bcn@uk + dt*zbc
+		y = Bcn@uk + zbc
 		ukp1 = np.linalg.solve(Acn, y)
 		U[:,kt+1] = ukp1
 		uk = ukp1
@@ -66,7 +71,7 @@ def doCN(uinit, x, t, D, BC0, BCL):
 # =============================================================================
 # Animation
 # =============================================================================
-def doMovie(x, t, U):
+def doMovie(x, t, U, ktskip):
 	u0 = U[:,0]
 	Nt = len(t) - 1
 	
@@ -83,10 +88,11 @@ def doMovie(x, t, U):
 		u = U[:, frame]
 		p_update.set_xdata(x)
 		p_update.set_ydata(u)
-		ax.set(title=f'Time t = {tk:.3f} s')
+		ax.set(title=f'Time t = {tk:.2f} s')
 		return(p_update)
 
-	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(0, Nt+1), interval=100)
+	ani = manimation.FuncAnimation(fig=fig, func=update, 
+			frames=range(0, Nt+1, ktskip), interval=100)
 
 	plt.show()
 
@@ -94,22 +100,27 @@ def doMovie(x, t, U):
 # Main Simulation Function
 # =============================================================================
 def CN_Diffusion_NR():
-	# --- Parameters
-	D = 1
+	# --- Global parameters
 	L = 1
-	tend = 0.04
-		
-	# --- Discretizations
-	Nt, Nx = 250, 2**8
-	x = np.linspace(0, L, Nx+1)
-	t = np.linspace(0, tend, Nt+1)
-	dt, dx = tend/Nt, L/Nx
+	D = .1
 
-	# --- Boundary Conditions
-	del0, u0 = 0, 0	# For Robin -Du_x + del0 u = del0 u0 at x = 0
-	delL, uL = 0, 0 # For Robin  Du_x + delL u = delL uL at x = L
-	BC0 = np.array([del0, u0])
-	BCL = np.array([delL, uL])
+	# --- Boundary Conditions (zero porosity for Neumann condition)
+	U0, UL = 1, 0		# value at boundary, outside for Robin condition
+	del0, delL = 1, 1	# porosity (reaction rate) for Robin condition
+
+	# --- Discretization
+	Nx = 2**6		# number of spatial partitions
+	Nt = 2**9		# number of temporal partitions
+	dx = L/Nx		# spatial discretization
+	dt = 0.001		# temporal discretization
+	tf = dt*Nt		# end time
+	x = np.linspace(0, L, Nx+1)
+	t = np.linspace(0, tf, Nt+1) 
+
+	# --- Initial profile, pass boundary conditions to solver
+	u0_profile = np.exp( -(x - L/2)**2/(2*dx) )
+	BC0 = np.array([del0, U0])
+	BCL = np.array([delL, UL])
 	
 	# --- Initialization and surface u(x, t)
 	uinit = 1.5*np.cos(np.pi*(x - L/2))
@@ -131,8 +142,8 @@ def CN_Diffusion_NR():
 
 	# --- Initialization and animation
 	uinit = 1.5*np.exp(-(x - L/2)**2/(2*dx))
-	U = doCN(uinit, x, t, D, BC0, BCL)
-	doMovie(x, t, U)
+	U = doCN(u0_profile, x, t, D, BC0, BCL)
+	doMovie(x, t, U, 2**3)
 
 	
 	

@@ -2,6 +2,17 @@
 """
 Diffusion with Dirichlet BCs via Crank-Nicolson
 
+We approximate the solution of the Diffusion Equation (5.37) -- (5.38) with
+Dirichlet conditions using Crank-Nicolson
+
+Specifically, we find a numerical solution to the BVP
+
+ u_t = D u_xx
+ u = U0 at x=0
+ u = UL at x=L
+
+where the nonhomogenous boundary conditions are given as Dirichlet conditions.
+
 """
 
 # =============================================================================
@@ -49,7 +60,7 @@ def CN_solve(x, t, uinit, D, BC):
 # =============================================================================
 # Create Animation
 # =============================================================================
-def doMovie(x, t, U):
+def doMovie(x, t, U, ktskip):
 	u0 = U[:,0]
 	Nt = np.size(t) - 1
 
@@ -70,7 +81,8 @@ def doMovie(x, t, U):
 		ax.legend(loc='upper left')
 		return(p_update)
         
-	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(Nt+1), interval=100)
+	ani = manimation.FuncAnimation(fig=fig, func=update, 
+			frames=range(0, Nt+1, ktskip), interval=100)
 	plt.show()
 
 # =============================================================================
@@ -80,23 +92,26 @@ def CN_diffusion_D():
 	# --- Global parameters
 	L = 1
 	D = .1
-	u0, uL = 0, 0
+	
+	# --- Boundary Conditions
+	U0, UL = 0, 0
 
 	# --- Discretization
-	Nt, Nx = 250, 2**6
-	dx = L/Nx
-	dt = 0.01#dx**2/(4*D)
-	tf = dt*Nt
+	Nx = 2**6		# number of spatial partitions
+	Nt = 2**9		# number of temporal partitions
+	dx = L/Nx		# spatial discretization
+	dt = 0.001		# temporal discretization, dt < dx**2/(2D)
+	tf = dt*Nt		# end time
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, tf, Nt+1) 
-	
-	# --- Boundary conditions, initial profile
-	BC = np.array([u0, uL])
+
+	# --- Initial profile, pass boundary conditions to solver
 	u0_profile = np.exp( -(x - L/2)**2/(2*dx) )
+	BC = np.array([U0, UL])	
 
 	# --- Solution and animation
 	U = CN_solve(x, t, u0_profile, D, BC)
-	doMovie(x, t, U)
+	doMovie(x, t, U, 2**3)
 
 # =============================================================================
 # Execute the simulation if the script is run directly

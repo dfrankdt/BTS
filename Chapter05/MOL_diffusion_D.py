@@ -8,6 +8,13 @@ spatial region into N subintervals.  For the  N-1 interior points, we create
 the second difference operator. For the two boundary points, we set the RHS
 of the ODE to be zero.
 
+Specifically, we find a numerical solution to the BVP
+
+ u_t = D u_xx
+ u = U0 at x=0
+ u = UL at x=L
+
+where the nonhomogenous boundary conditions are given as Dirichlet conditions.
 """
 
 # =============================================================================
@@ -21,14 +28,16 @@ import matplotlib.animation as manimation
 # =============================================================================
 # DE RHS
 # =============================================================================
-def de_rhs(t, u, alpha):
+def de_rhs(t, u, dx, D):
 	N = len(u)-1
-	d2u = np.zeros(N+1)
-	d2u[1:N] = u[0:N-1] - 2*u[1:N] + u[2:N+1]
-	d2u[0] = 0
-	d2u[-1] = 0
-	du = alpha*d2u
-	return du
+	alpha = D/dx**2
+	
+	d2U = np.zeros(N+1)
+	d2U[1:N] = u[0:N-1] - 2*u[1:N] + u[2:N+1]
+	d2U[0] = 0
+	d2U[-1] = 0
+	dudt = alpha*d2U
+	return dudt
 
 # =============================================================================
 # Animation
@@ -65,27 +74,27 @@ def MOL_diffusion_D():
 	# --- Global parameters
 	L = 1			# length of domain
 	D = .1			# diffusion coefficient
-	u0, uL = 0, 0	# Dirichlet Conditions
+	
+	# --- Boundary Conditions
+	U0, UL = 0, 0	# Dirichlet Conditions
 
 	# --- Discretization
-	Nt, Nx = 2**8, 2**6
-	dx = L/Nx
-	dt = 0.001
-	tf = dt*Nt
-	x = np.linspace(0, L, Nx + 1)
-	t = np.linspace(0, tf, Nt + 1)
+	Nx = 2**6		# number of spatial partitions
+	Nt = 2**9		# number of temporal partitions
+	dx = L/Nx		# spatial discretization
+	dt = 0.001		# temporal discretization, dt < dx**2/(2D)
+	tf = dt*Nt		# end time
+	x = np.linspace(0, L, Nx+1)
+	t = np.linspace(0, tf, Nt+1) 
 
-	# --- Initial profile (Gaussian)
-	uinit = np.exp(- (x - L/2)**2/(2*dx) )
-	uinit[0] = u0
-	uinit[-1] = uL
-
-	# --- Initialization
-	alpha = D/dx**2
-	U = np.zeros( (Nx+1, Nt+1) )
+	# --- Initial profile, pass boundary conditions to solver
+	IVP_arg = [dx, D]
+	u0_profile = np.exp( -(x - L/2)**2/(2*dx) )
+	u0_profile[0] = U0
+	u0_profile[-1] = UL
 
 	# --- Solve the IVP
-	soln = solve_ivp(de_rhs, [0, tf], uinit, args=[alpha], dense_output=True)
+	soln = solve_ivp(de_rhs, [0, tf], u0_profile, args=IVP_arg, dense_output=True)
 	U = soln.sol(t)
 
 	# --- Animation

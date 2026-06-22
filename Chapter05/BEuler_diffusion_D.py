@@ -2,6 +2,16 @@
 """
 Diffusion with Dirichlet BCs via Backward Euler
 
+We approximate the solution of the Diffusion Equation (5.37) -- (5.38) with
+Dirichlet conditions using Backward Euler
+
+Specifically, we find a numerical solution to the BVP
+
+ u_t = D u_xx
+ u = U0 at x=0
+ u = UL at x=L
+
+where the nonhomogenous boundary conditions are given as Dirichlet conditions.
 """
 
 # =============================================================================
@@ -84,19 +94,22 @@ def BEuler_diffusion_D():
 	# --- Global parameters
 	L = 1
 	D = .1
-	u0, uL = 0, 0
+	
+	# --- Boundary Conditions
+	U0, UL = 0, 0
 
 	# --- Discretization
-	Nt, Nx = 2**8, 2**6
-	dx = L/Nx
-	dt = 0.001 
-	tf = dt*Nt
-	t = np.linspace(0, tf, Nt+1) 
+	Nx = 2**6		# number of spatial partitions
+	Nt = 2**9		# number of temporal partitions
+	dx = L/Nx		# spatial discretization
+	dt = 0.001		# temporal discretization, dt < dx**2/(2D)
+	tf = dt*Nt		# end time
 	x = np.linspace(0, L, Nx+1)
-	
-	# --- Boundary conditions, initial profile
-	BC = np.array([u0, uL])	
+	t = np.linspace(0, tf, Nt+1) 
+
+	# --- Initial profile, pass boundary conditions to solver
 	u0_profile = np.exp( -(x - L/2)**2/(2*dx) )
+	BC = np.array([U0, UL])	
 
 	# --- Solution and animation
 	U = BE_solve(x, t, u0_profile, D, BC)

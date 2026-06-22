@@ -2,6 +2,16 @@
 """
 Diffusion with Neumann or Robin BCs via Forward Euler
 
+We approximate the solution of the Diffusion Equation (5.37) -- (5.38) with
+using either Neumann or Robin boundary conditions using Forward Euler
+
+Specifically, we find a numerical solution to the BVP
+
+ u_t = D u_xx
+ Du_x = delta_0(u - U0) at x=0
+ -Du_x = deltaL(u - UL) at x=L
+
+where the nonhomogenous boundary conditions are given as in equation (5.23). In this case, the capital letters indicate given values at the boundary, but outside the domain.
 """
 
 # =============================================================================
@@ -27,7 +37,6 @@ def FE_solve_NR(x, t, uinit, D, BC0, BCL):
     # --- Second difference operator, adjusted for BC
     D2 = -2*np.eye(Nx+1)
     D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
-    D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
     D2[0, 0] = -2*dx/D*del0 - 2
     D2[0, 1] = 2
     D2[-1, -2] = 2
@@ -41,7 +50,7 @@ def FE_solve_NR(x, t, uinit, D, BC0, BCL):
     zbc = np.zeros(Nx+1)
     zbc[0] = (2*dx/D) * (del0*U0)
     zbc[-1] = (2*dx/D) * (delL*UL)
-#    zbc = gam*zbc
+    zbc = gam*zbc
 
     # --- Initialization
     U = np.zeros( (Nx+1, Nt+1) )
@@ -50,7 +59,7 @@ def FE_solve_NR(x, t, uinit, D, BC0, BCL):
     # --- Steps
     uk = uinit
     for kt in range(Nt):
-        ukp1 = BFE@uk + dt*zbc
+        ukp1 = BFE@uk + zbc
         U[:, kt+1] = ukp1
         uk = ukp1
     return U
@@ -87,28 +96,31 @@ def doMovie(x, t, U, ktskip):
 # Main Simulation Function
 # =============================================================================
 def FEuler_Diffusion_NR():
-    # --- Global parameters
-    L = 1
-    D = .1
-    del0, U0 = 0, 0
-    delL, UL = 0, 0
+	# --- Global parameters
+	L = 1
+	D = .1
 
-    # --- Discretization
-    Nt, Nx = 2**8, 2**6
-    dx = L/Nx
-    dt = 0.0001      # need dt < dx**2/(4D)
-    tf = dt*Nt
-    x = np.linspace(0, L, Nx+1)
-    t = np.linspace(0, tf, Nt+1) 
+	# --- Boundary Conditions (zero porosity for Neumann condition)
+	U0, UL = 1, 0		# value at boundary, outside for Robin condition
+	del0, delL = 1, 1	# porosity (reaction rate) for Robin condition
 
-    # --- Boundary Conditions, initial profile
-    BC0 = np.array([del0, U0])
-    BCL = np.array([delL, UL])
-    u0_profile = np.exp( -(x - L/2)**2/(2*dx) )
+	# --- Discretization
+	Nx = 2**6		# number of spatial partitions
+	Nt = 2**9		# number of temporal partitions
+	dx = L/Nx		# spatial discretization
+	dt = 0.001		# temporal discretization, dt < dx**2/(2D)
+	tf = dt*Nt		# end time
+	x = np.linspace(0, L, Nx+1)
+	t = np.linspace(0, tf, Nt+1) 
 
-    # --- Solution and animation
-    U = FE_solve_NR(x, t, u0_profile, D, BC0, BCL)
-    doMovie(x, t, U, 2**3)
+	# --- Initial profile, pass boundary conditions to solver
+	u0_profile = np.exp( -(x - L/2)**2/(2*dx) )
+	BC0 = np.array([del0, U0])
+	BCL = np.array([delL, UL])
+
+	# --- Solution and animation
+	U = FE_solve_NR(x, t, u0_profile, D, BC0, BCL)
+	doMovie(x, t, U, 2**3)
 
 # =============================================================================
 # Execute the simulation if the script is run directly
