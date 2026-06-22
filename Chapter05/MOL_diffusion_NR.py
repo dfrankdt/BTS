@@ -31,8 +31,8 @@ def de_rhs_NR(t, u, dx, D, del0, U0, delL, UL):
 
 	D2u = np.zeros(N+1)
 	D2u[1:N] = u[0:N-1] - 2*u[1:N] + u[2:N+1]
-	D2u[0] = (-2 - 2*dx/D*del0)*u[0] + 2*u[1] + 2*dx/D*U0 
-	D2u[-1] = 2*u[-2] + (-2 - 2*dx/D*delL)*u[-1] + +2*dx/D*UL
+	D2u[0] = (-2 - 2*dx/D*del0)*u[0] + 2*u[1] + 2*dx/D*del0*U0 
+	D2u[-1] = 2*u[-2] + (-2 - 2*dx/D*delL)*u[-1] + +2*dx/D*delL*UL
 	dudt = alpha*D2u
 	return dudt
 
