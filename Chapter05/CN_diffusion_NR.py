@@ -5,10 +5,10 @@ Diffusion with Neumann or Robin BCs via Crank-Nicolson
 We find a numerical solution to the BVP
 
  u_t = D u_xx
- Du_x = delta_0(u - u0) at x=0
- -Du_x = deltaL(u - uL) at x=L
+ Du_x = delta_0(u - U0) at x=0
+ -Du_x = deltaL(u - UL) at x=L
 
-where the nonhomogenous boundary conditions are given as in equation (5.23).
+where the nonhomogenous boundary conditions are given as in equation (5.23). In this case, the capital letters indicate given values at the boundary, but outside the domain.
 
 TO DO: Adjust figsize and zlim
 """
@@ -30,8 +30,8 @@ def doCN(uinit, x, t, D, BC0, BCL):
 	Nx = len(x) - 1
 	Nt = len(t) - 1
 	
-	del0, u0 = BC0
-	delL, uL = BCL
+	del0, U0 = BC0
+	delL, UL = BCL
 	
 	# --- Second difference operator, adjusted for BC
 	D2 = -2*np.eye(Nx+1)
@@ -43,8 +43,8 @@ def doCN(uinit, x, t, D, BC0, BCL):
 	
 	# --- Nonhomogenous BC
 	zbc = np.zeros(Nx+1)
-	zbc[0] = (2*dx/D) * (del0*u0)
-	zbc[-1] = (2*dx/D) * (delL*uL)
+	zbc[0] = (2*dx/D) * (del0*U0)
+	zbc[-1] = (2*dx/D) * (delL*UL)
 	
 	# --- CN Split
 	gam = D*dt/(dx**2)

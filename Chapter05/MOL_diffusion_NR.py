@@ -2,9 +2,18 @@
 """
 Diffusion with Neumann or Robin BCs via the Method of Lines
 
+TO DO: I think the BCs need adjustment
+
 We approximate the solution of the Diffusion Equation (5.37) -- (5.38) with
 using either Neumann or Robin boundary conditions using the method of lines
 
+We find a numerical solution to the BVP
+
+ u_t = D u_xx
+ Du_x = delta_0(u - U0) at x=0
+ -Du_x = deltaL(u - UL) at x=L
+
+where the nonhomogenous boundary conditions are given as in equation (5.23). In this case, the capital letters indicate given values at the boundary, but outside the domain.
 """
 
 # =============================================================================
