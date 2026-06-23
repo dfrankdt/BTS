@@ -23,7 +23,7 @@ def F(u, g, alpha):
 # =============================================================================
 # Crank-Nicolson Method
 # =============================================================================
-def doCN(u0, g0, x, t, Du, Dg, alpha):
+def doCN(x, t, u0_profile, g0_profile, Du, Dg, alpha):
 	"""
 	Crank-Nicolson to approximate the solution of the PDEs 
 	
@@ -60,28 +60,29 @@ def doCN(u0, g0, x, t, Du, Dg, alpha):
 	Nx = np.size(x) - 1
 	Nt = np.size(t) - 1
 
-	U = np.zeros( (Nx+1, Nt+1) )
-	U[:,0] = u0
-	
-	G = np.zeros( (Nx+1, Nt+1) )
-	G[:,0] = g0
-
-	# -- Matrices for performing CN
-	gam_u = Du*dt/(2*dx**2)
-	gam_g = Dg*dt/(2*dx**2)
+	# --- Second difference operator, adjusted for no flux BC
 	D2 = -2*np.eye(Nx+1)
 	D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
-	# -- No Flux BCs
 	D2[0,0], D2[-1, -1] = -1, -1
 
-	Acn_u = np.eye(Nx+1) - gam_u*D2
-	Bcn_u = np.eye(Nx+1) + gam_u*D2
-	Acn_g = np.eye(Nx+1) - gam_g*D2
-	Bcn_g = np.eye(Nx+1) + gam_g*D2
+	# -- CN Split
+	gam_u = Du*dt/(dx**2)
+	gam_g = Dg*dt/(dx**2)
+
+	Acn_u = np.eye(Nx+1) - (gam_u/2)*D2
+	Bcn_u = np.eye(Nx+1) + (gam_u/2)*D2
+	Acn_g = np.eye(Nx+1) - (gam_g/2)*D2
+	Bcn_g = np.eye(Nx+1) + (gam_g/2)*D2
 
 	# -- Initialization of CN method
-	uk, gk = u0, g0
+	U = np.zeros( (Nx+1, Nt+1) )
+	U[:,0] = u0_profile
 	
+	G = np.zeros( (Nx+1, Nt+1) )
+	G[:,0] = g0_profile
+
+	# --- Steps
+	uk, gk = u0_profile, g0_profile
 	for kt in range(Nt):
 		y_u = Bcn_u@uk + dt*F(uk, gk, alpha)
 		y_g = Bcn_g@gk - dt*F(uk, gk, alpha)
@@ -89,12 +90,11 @@ def doCN(u0, g0, x, t, Du, Dg, alpha):
 		ukp1 = np.linalg.solve(Acn_u, y_u)
 		gkp1 = np.linalg.solve(Acn_g, y_g)
 
-		uk = ukp1
-		gk = gkp1
-
 		U[:,kt+1] = ukp1
 		G[:,kt+1] = gkp1
 
+		uk = ukp1
+		gk = gkp1
 	return U, G
 
 # =============================================================================
@@ -127,7 +127,8 @@ def doMovie(x, t, U, G):
 	    ax1.set(title=f'Time t = {tk:.2f} s')
 	    return(p1_update, p2_update)
         
-	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(Nt+1), interval=100)
+	ani = manimation.FuncAnimation(fig=fig, func=update, 
+		frames=range(Nt+1), interval=100)
 	plt.show()
 
 # =============================================================================
@@ -135,7 +136,7 @@ def doMovie(x, t, U, G):
 # =============================================================================
 def CN_diffusion_gluc_micro_X():
 
-	# -- Parameters
+	# --- Global Parameters
 	alpha = 0.1
 	L = 200
 	Du = 0.1
@@ -149,11 +150,11 @@ def CN_diffusion_gluc_micro_X():
 	t = np.linspace(0, tend, Nt+1)
 
 	# -- Initial profile for state variables
-	u0 = 0.1*np.exp(- (x-L/2)**2/10)
-	g0 = np.ones(Nx+1)/2-u0
+	u0_profile = 0.1*np.exp(- (x-L/2)**2/10)
+	g0_profile = np.ones(Nx+1)/2 - u0_profile
 
 	# -- Perform Crank-Nicolson
-	U, G = doCN(u0, g0, x, t, Du, Dg, alpha)
+	U, G = doCN(x, t, u0_profile, g0_profile, Du, Dg, alpha)
 
 	# -- Create Movie
 	doMovie(x, t, U, G)	

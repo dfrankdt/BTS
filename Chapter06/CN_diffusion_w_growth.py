@@ -30,28 +30,32 @@ def F(u, sigma, alpha):
 # =============================================================================
 # CN Scheme
 # =============================================================================
-def doCN(u0, x, t, D, sigma, alpha):
+def doCN(x, t, uinit, D, sigma, alpha):
 	dx = x[1]-x[0]
 	dt = t[1]-t[0]
 	Nx = np.size(x) - 1
 	Nt = np.size(t) - 1
-
-	gam = D*dt/(2*dx**2)
+	
+	# --- Second difference operator
 	D2 = -2*np.eye(Nx+1)
 	D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
 
-	Acn = np.eye(Nx+1) - gam*D2
-	Bcn = np.eye(Nx+1) + gam*D2
+	# --- CN split, implicit zero boundary conditions outside the domain
+	gam = D*dt/(dx**2)
+	Acn = np.eye(Nx+1) - (gam/2)*D2
+	Bcn = np.eye(Nx+1) + (gam/2)*D2
 
+	# --- Initialization
 	U = np.zeros( (Nx+1, Nt+1) )
-	U[:,0] = u0
+	U[:,0] = uinit
 
-	uk = u0
+	# --- Steps
+	uk = uinit
 	for kt in range(Nt):
 		y = Bcn@uk + dt*F(uk, sigma, alpha)
 		ukp1 = np.linalg.solve(Acn, y)
-		uk = ukp1
 		U[:,kt+1] = ukp1
+		uk = ukp1
 	return U
 
 # =============================================================================
@@ -136,18 +140,18 @@ def CN_diffusion_w_growth():
         # --- Set spatial and temporal scales, initial profile
         x = np.linspace(0, L, Nx+1)
         t = np.linspace(0, dt*Nt, Nt+1)
-        u0 = 0.2*np.exp(- (x-L/2)**2/(L/4))
+        u0_profile = 0.2*np.exp(- (x-L/2)**2/(L/4))
 
         # --- Do the solving
         print(f'We approximate the solution on 0 < x < {x[-1]:2.1f} for 0 < t < {t[-1]:2.1f}')
         
         
         sigma = -1
-        U_decay = doCN(u0, x, t, D, sigma, alpha)
+        U_decay = doCN(x, t, u0_profile, D, sigma, alpha)
         sigma = 1
-        U_growth = doCN(u0, x, t, D, sigma, alpha)
+        U_growth = doCN(x, t, u0_profile, D, sigma, alpha)
         sigma = 0
-        U_diffusion = doCN(u0, x, t, D, sigma, alpha)
+        U_diffusion = doCN(x, t, u0_profile, D, sigma, alpha)
 
         # --- Animation or Snapshots, depending
         doMovie(x, t, U_decay)

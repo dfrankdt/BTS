@@ -24,7 +24,7 @@ def F(u, r, K):
 # =============================================================================
 # Crank-Nicolson Method
 # =============================================================================
-def doCN(uinit, x, t, Du, r, K):
+def doCN(x, t, uinit, Du, r, K):
 	""" 
 	Crank-Nicolson to simulate the Fisher Equation
 		
@@ -55,8 +55,8 @@ def doCN(uinit, x, t, Du, r, K):
 	for kt in range(Nt):
 		y = Bcn@uk + dt*F(uk, r, K)
 		ukp1 = np.linalg.solve(Acn, y)
-		uk = ukp1
 		U[:,kt+1] = ukp1
+		uk = ukp1
 	return U
 
 # =============================================================================
@@ -84,7 +84,8 @@ def doMovie(x, t, U):
 	    ax.set(title=f'Time t = {tk:.2f} s')
 	    return(p_update)
         
-	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(0, Nt+1), interval=100)
+	ani = manimation.FuncAnimation(fig=fig, func=update, 
+			frames=range(0, Nt+1), interval=100)
 	plt.show()
 
 # =============================================================================
@@ -131,10 +132,10 @@ def CN_Fisher():
 	t = np.linspace(0, dt*Nt, Nt+1)
 
 	# --- Initial profile for state variable 
-	uinit = 0.002*np.exp( -(x - L/2)**2 / (L/4) )
+	u0_profile = 0.002*np.exp( -(x - L/2)**2 / (L/4) )
 
 	# --- Perform Crank-Nicolson
-	U = doCN(uinit, x, t, Du, r, K)
+	U = doCN(x, t, u0_profile, Du, r, K)
 
 	# --- Create Movie 
 	# --- (comment out when producing a plot) 

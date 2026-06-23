@@ -6,7 +6,7 @@ We approximate the solution to Fisher's equation on 0 < x < L
 (dimensionless) with zero Dirichlet boundary data using two
 different values of L.
 
-Notes
+TO DO
  - fix the initial profile
  - create snapshots
  - fine tune dt, dx
@@ -32,22 +32,20 @@ def F(u):
 # =============================================================================
 #  CN Scheme
 # =============================================================================
-def doCN(u0, x, t):
+def doCN(x, t, uinit, D, BC):
 	dx = x[1]-x[0]
 	dt = t[1]-t[0]
 	Nx = len(x) - 1
 	Nt = len(t) - 1
-
-	U = np.zeros( (Nx+1, Nt+1) )
-	U[:,0] = u0
-
-	# --- Matrices for performing CN
-	gam = dt/(2*dx**2)
+	
+	# --- Second difference operator
 	D2 = -2*np.eye(Nx+1)
 	D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
 
-	Acn = np.eye(Nx+1) - gam*D2
-	Bcn = np.eye(Nx+1) + gam*D2
+	# --- CN split, adjusted for Dirichlet BC
+	gam = D*dt/(dx**2)
+	Acn = np.eye(Nx+1) - (gam/2)*D2
+	Bcn = np.eye(Nx+1) + (gam/2)*D2
 	
 	Acn[0,:] = np.zeros(Nx+1)
 	Acn[0, 0] = 1
@@ -55,18 +53,22 @@ def doCN(u0, x, t):
 	Acn[-1, -1] = 1
 
 	# --- Initialization of CN method
-	uk = u0
+	U = np.zeros( (Nx+1, Nt+1) )
+	U[:,0] = uinit
+
+	# --- Steps
+	uk = uinit
 	for kt in range(Nt):
 		y = Bcn@uk + dt*F(uk)
-		y[0], y[-1] = 0, 0
+		y[0], y[-1] = BC
 		ukp1 = np.linalg.solve(Acn, y)
-		uk = ukp1
 		U[:,kt+1] = ukp1
+		uk = ukp1
 	return U
 # =============================================================================
 #  Create Animation
 # =============================================================================
-def doMovie(x, t, U):
+def doMovie(x, t, U, ktskip):
 	Nt = len(t) - 1
 	u0 = U[:,0]
         
@@ -88,7 +90,7 @@ def doMovie(x, t, U):
 		return(p_update)
         
 	ani = manimation.FuncAnimation(fig=fig, func=update, 
-	frames=range(0, Nt+1), interval=10)
+			frames=range(0, Nt+1, ktskip), interval=100)
 
 	plt.show()
 
@@ -96,23 +98,32 @@ def doMovie(x, t, U):
 #  Main Simulation Function
 # =============================================================================
 def CN_Fisher_w_Dirichlet():
-	# --- Global Parameter
-	L = 2
+	# --- Global parameters
+	L = 2	# Below threshold for traveling wave
+	L = 5	# Above threshold for traveling wave
 	D = 1
+	
+	# --- Boundary Conditions
+	U0, UL = 0, 0
 
-	# -- Spatial and Temporal Scales
-	Nt, Nx = 2**10, 2**8
-	dt, dx = 0.002,  L/Nx
+	# --- Discretization
+	Nx = 2**6
+	Nt = 2**9
+	dx = L/Nx
+	dt = 0.1
+	tf = dt*Nt
 	x = np.linspace(0, L, Nx+1)
-	t = np.linspace(0, dt*Nt, Nt+1)
+	t = np.linspace(0, tf, Nt+1)
 
-	# -- Initial profile and array for state variable
-	u0 = np.tanh(x/(L/25)) * np.tanh(-(x - L)/(L/25))
-	u0 = (1 + np.tanh( (x - L/2)/(L/25) ))*(1 + np.tanh(-(x - L/2)/(L/25)))/8
+	# --- Initial profile, pass boundary conditions to solver
+	u0_profile = np.tanh(x/(L/25)) * np.tanh(-(x - L)/(L/25))
+	u0_profile = (1 + np.tanh( (x - L/2)/(L/25) ))*(1 + np.tanh(-(x - L/2)/(L/25)))/8
+	BC = np.array([U0, UL])
+	
+	# --- Solution and animation
+	U = doCN(x, t, u0_profile, D, BC)
 
-	U = doCN(u0, x, t)
-
-	doMovie(x, t, U)
+	doMovie(x, t, U, 2**3)
 
 # =============================================================================
 # Execute the simulation if the script is run directly

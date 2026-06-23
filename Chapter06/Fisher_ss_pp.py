@@ -5,6 +5,7 @@ Phase Plane for the Steady State of the Fisher Equation
 We find a numerical solution of the associated ODE, leveraging the event
 switch in solve_ivp to stop integrating when needed.
 
+TO DO: Double check the trajectory in Figure 2
 """
 
 # =============================================================================
@@ -85,7 +86,6 @@ def Fisher_ss_pp():
 	ax1.plot([0, 0], [-w0_max, w0_max], '--r')
 	
 	# --- Robin Boundary Conditions
-
 	fig2, ax2 = plt.subplots()
 	ax2.plot([0, 1], [0, 0], 'ok')
 	ax2.set(xlabel = 'v', ylabel = 'w')

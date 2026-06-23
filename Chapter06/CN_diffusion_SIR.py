@@ -24,34 +24,39 @@ import matplotlib.animation as manimation
 #  Nonlinearity
 # =============================================================================
 def F(s, u, alpha):
-	# -- Reaction term for the RD Equation
+	# --- Reaction term for the RD Equation
 	y = alpha * s * u
 	return y
 
 # =============================================================================
 # Crank-Nicolson Method
 # =============================================================================
-def doCN(s0, u0, x, t, D, eta, r):
+def doCN(x, t, sinit, uinit, D, eta, r):
 	dx = x[1] - x[0]
 	dt = t[1] - t[0]
 	Nx = len(x) - 1
 	Nt = len(t) - 1
 	
-	gam = D*dt/(2*dx**2)
+	# --- Second difference operator, adjusted for no flux
 	D2 = -2*np.eye(Nx+1)
 	D2 = D2 + np.eye(Nx+1, k=1) + np.eye(Nx+1, k=-1)
 	D2[0,0] = -1
 	D2[-1, -1] = -1
-	Acn = np.eye(Nx+1) - gam*D2
-	Bcn = np.eye(Nx+1) + gam*D2
 	
+	# --- CN Split
+	gam = D*dt/(dx**2)
+	Acn = np.eye(Nx+1) - (gam/2)*D2
+	Bcn = np.eye(Nx+1) + (gam/2)*D2
+
+	# --- Initialization	
 	S = np.zeros( (Nx+1, Nt+1) )
 	U = np.zeros( (Nx+1, Nt+1) )
-	S[:,0] = s0
-	U[:,0] = u0
-	
-	sk = s0
-	uk = u0
+	S[:,0] = sinit
+	U[:,0] = uinit
+
+	# --- Steps	
+	sk = sinit
+	uk = uinit
 	for kt in range(Nt):
 		y = Bcn@uk + dt * (F(sk, uk, r) - eta*uk)
 		skp1 = sk - dt*(F(sk, uk, r))
@@ -71,7 +76,7 @@ def doMovie(x, t, S, U, ktskip):
 	u0 = U[:,0]
 	Nt = len(t) - 1
 	
-	# Initialize movie
+	# --- Initialization
 	fig, (ax1, ax2) = plt.subplots(2, 1)
 	p1_init = ax1.plot(x, u0, '--b', label='Initial Profile')
 	p2_init = ax2.plot(x, s0, '--b', label='Initial Profile')
@@ -82,6 +87,7 @@ def doMovie(x, t, S, U, ktskip):
 	ax2.set(xlabel = r'$\xi$', ylabel = r'$\sigma(\xi, \tau)$', ylim=(0,1))
 	ax2.legend(loc='upper left')
 
+	# --- Update
 	def update(frame):
 		tk = t[frame]
 		u = U[:, frame]
@@ -93,7 +99,8 @@ def doMovie(x, t, S, U, ktskip):
 		ax1.set(title=f'Time t = {tk:.2f} s')
 		return(p1_update, p2_update)
         
-	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(0,Nt+1, ktskip), interval=100)
+	ani = manimation.FuncAnimation(fig=fig, func=update, 
+			frames=range(0,Nt+1, ktskip), interval=100)
 	plt.show()
 
 # =============================================================================
@@ -114,11 +121,11 @@ def CN_diffusion_SIR():
 	t = np.linspace(0, tend, Nt+1)
 
 	# --- Initial Profile
-	uinit = 0.1 / np.cosh(2*(x - L/2))**2
-	sinit = 1 - uinit
+	u0_profile = 0.1 / np.cosh(2*(x - L/2))**2
+	s0_profile = 1 - u0_profile
 	
 	# --- Solve and animate
-	S, U = doCN(sinit, uinit, x, t, D, eta, r)
+	S, U = doCN(x, t, s0_profile, u0_profile, D, eta, r)
 	doMovie(x, t, S, U, 2**3)
 
 # =============================================================================

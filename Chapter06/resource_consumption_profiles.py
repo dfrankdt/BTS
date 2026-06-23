@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-Template
+Resource Consumption Profiles
 
+TO DO 
+ - Does it make sense that one of the state variables appears to be negative
+ - Is there a second figure?
 """
 
 # =============================================================================
