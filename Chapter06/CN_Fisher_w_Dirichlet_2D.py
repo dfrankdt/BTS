@@ -11,6 +11,8 @@ We note that this particular code examines a square grid with N partitions in
 the x and y directions. Given the homogeneous Dirichlet data, we solve only at 
 the (N-1) x (N-1) interior points.
 
+According to Ch 6 analysis, the threshold is mu = L^2 alpha/D = 2 pi^2.
+
 TO DO:
  - Possibly incorporate the initial profile in the movie
 """
@@ -99,7 +101,7 @@ def doMovie(x, y, t, U):
 # =============================================================================
 def CN_Fisher_w_Dirichlet_2D():
 	# --- Global parameters
-	mu = 22 # not exactly sure about threshold, yes traveling wave mu = 22
+	mu = 18 # Threshold behavior should be mu = 2 pi^2 approx 20
 	
 	# --- Discretizations
 	N = 2**5
