@@ -9,7 +9,7 @@ Figures produced
 	- Figure 2: mean squared displacement as a function of time step n compared to theory
 	- Figure 3: comparison of histogram to Gaussian
 	
-That this code is based on discrete_random_walk.m
+That this code is based on discrete_random_walk.m 
 """
 
 # =============================================================================
