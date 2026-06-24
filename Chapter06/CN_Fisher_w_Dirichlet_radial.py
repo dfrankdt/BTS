@@ -118,7 +118,7 @@ def CN_Fisher_w_Dirichlet_radial():
 	# --- Global parameters
 	R = 1 # or R = 10
 	D = 1
-	UR = 0.1
+	UR = 0
 	
 	# --- Discretization
 	Nr = 2**6
