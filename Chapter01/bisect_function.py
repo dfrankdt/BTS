@@ -3,7 +3,6 @@
 Bisection: Illustration of the method of bisection.
 
 This code is based on bisect_function.m
-
 """
 # =============================================================================
 # Target Function

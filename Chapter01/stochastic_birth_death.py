@@ -15,6 +15,7 @@ Figures Produced
  - Figure 2:
  
 Note that this code is based on stochastic_birth_death.m
+
 """
 
 # =============================================================================

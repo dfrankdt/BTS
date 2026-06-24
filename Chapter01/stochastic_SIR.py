@@ -15,6 +15,7 @@ Generates figures:
   - Figure 2: Time to clear infection and number of infected for R0 = 0.9
 
 Note that this code is based on stochastic_SIR.m
+
 """
 
 # =============================================================================

@@ -17,6 +17,7 @@ Figures Produced
  - Figure 2:
  
 Note that this code is based on exponential_decay_via_Gillespie.m
+
 """
 
 # =============================================================================

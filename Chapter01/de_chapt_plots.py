@@ -2,9 +2,9 @@
 """
 Plots: We create the plots shown in Figures 1.1 - 1.5 of the text.
 
+TO DO:
+- Display reasonably sized arrows in quiver
 """
-
-# --- To Do: Figure out how to display reasonably sized arrows in quiver
 
 # =============================================================================
 # Packages

@@ -4,6 +4,7 @@ SIR Phase Portrait
 
 Create the SIR model phase portrait shown in Figure 1.6
 
+
 """
 
 # =============================================================================
