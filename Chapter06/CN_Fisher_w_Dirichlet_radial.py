@@ -14,7 +14,6 @@ TO DO
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
 import matplotlib.animation as manimation
 
 # =============================================================================
@@ -89,24 +88,27 @@ def doMovie(r, t, U, ktskip):
 	theta = np.linspace(0, 2*np.pi, Nr+1)
 	R, Theta = np.meshgrid(r, theta)
 	X = R*np.cos(Theta)
-	Y = R*np.sin(Theta)	
+	Y = R*np.sin(Theta)
+	Uinit, Ones = np.meshgrid(uinit, np.ones(Nr+1))
 	
+	# --- Initialization
+	fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+	plot = [ax.plot_surface(X, Y, Uinit, cmap="copper", label='Surface')]
+	ax.set(xlabel='x', ylabel = 'y')
+	ax.set(zlim=(0,1))
+
+	# --- Animation update
 	def update(frame, zarray, plot):
 		tk = t[frame]
-		Uk = zarray[:, frame]
+		Uk, Ones = np.meshgrid(zarray[:, frame], np.ones(Nr+1))
 		plot[0].remove()
 		plot[0] = ax.plot_surface(X, Y, Uk, cmap="copper")
 		ax.set(title=f'Time t = {tk:.2f} s')
 		return(plot)
 		
-	# --- Initialization
-	fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
-	plot = [ax.plot_surface(X, Y, uinit), cmap="copper", label='Surface']
-	ax.set(xlabel='x', ylabel = 'y')
-	ax.set(zlim=(0,1))
 	
-	ani = manimation.FuncAnimation(fig=fig, func=update
-			frames=range(0, Nt+1), fargs=[U, plot], interval=100)
+	ani = manimation.FuncAnimation(fig=fig, func=update,
+			frames=range(0, Nt+1, ktskip), fargs=[U, plot], interval=100)
 	plt.show()
 
 # =============================================================================
@@ -114,14 +116,14 @@ def doMovie(r, t, U, ktskip):
 # =============================================================================
 def CN_Fisher_w_Dirichlet_radial():
 	# --- Global parameters
-	R = 5 # or R = 5
+	R = 1 # or R = 10
 	D = 1
-	UR = 0
+	UR = 0.1
 	
 	# --- Discretization
 	Nr = 2**6
 	Nt = 2**8
-	tf = 8
+	tf = 15
 	r = np.linspace(0, R, Nr+1)
 	t = np.linspace(0, tf, Nt+1)
 	
