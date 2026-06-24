@@ -9,6 +9,9 @@ Figures produced:
 	- Figure 1: Sample trajectories
 
 This script is based on agent_SIR_2d.py
+
+TO DO
+ - Fix this. It's not working
 """
 # =============================================================================
 # Packages
