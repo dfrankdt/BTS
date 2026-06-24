@@ -45,64 +45,68 @@ def doCN(r, t, uinit, D, UR):
 	rm = (r[1:Nr] + r[0:Nr-1])/2
 	
 	# --- Second derivative operator
-	D2 = -2*np.eye(Nr+1)
-	
-	D2p = np.zeros(Nr)
-	D2p[1:Nr] = rp/r[1:Nr]
-	D2m = np.zeros(Nr)
-	D2m[0:Nr-1] = rm/r[1:Nr]
-
-	D2 = D2 + np.diag( D2p, k=1) + np.diag(D2m, k=-1)
-	D2 = D2[0:Nr, 0:Nr]
+	D2p = rp[0:Nr-2]/r[1:Nr-1]
+	D2m = rm[1:Nr-1]/r[2:Nr]
+	D2 = -2*np.eye(Nr-1) + np.diag(D2p, k=1) + np.diag(D2m, k=-1)
 
 	# --- Matrices for CN
 	gam = D*dt/(dr**2)
-	Acn = np.eye(Nr) - (gam/2)*D2
-	Bcn = np.eye(Nr) + (gam/2)*D2
+	Acn = np.eye(Nr-1) - (gam/2)*D2
+	Bcn = np.eye(Nr-1) + (gam/2)*D2
 	
-	# --- Boundary condition at r = R
-	zbc = np.zeros(Nr)
-	zbc[-1] = rp[-1]/r[-1]*UR
-	zbc = gam*zbc
-
 	# --- Initialization
 	U = np.zeros( (Nr+1, Nt+1) )
 	U[:, 0] = uinit
 	
 	# --- Steps
-	uk = uinit[0:Nr]
+	uk = uinit
 	for kt in range(Nt):
-		y = Bcn@uk + zbc + dt*F(uk)
-		ukp1 = np.linalg.solve(Acn, y)
-		U[0:Nr, kt+1] = ukp1
-		U[-1, kt+1] = UR
+		# --- Incorporate boundary condition at r=0, r=R
+		zbc = np.zeros(Nr-1)
+		zbc[0] = gam * (rm[0]/r[1])*uk[0]
+		zbc[-1] = gam * (rp[-1]/r[-2])*UR
+
+		y = Bcn@uk[1:Nr] + zbc + dt*F(uk[1:Nr])
+		ukp1 = np.zeros(Nr+1)
+		ukp1[1:Nr] = np.linalg.solve(Acn, y)
+		
+		# --- Enforce boundary condition at r=0, r=R
+		ukp1[0] = ukp1[1]
+		ukp1[-1] = UR
+
+		U[:, kt+1] = ukp1
 		uk = ukp1
 	return U
 # =============================================================================
 # Animation
 # =============================================================================
 def doMovie(r, t, U, ktskip):
-	u0 = U[:,0]
+	uinit = U[:,0]
 	Nt = len(t) - 1
 
-	# --- Initialization
-	fig, ax = plt.subplots()
-	p_init = ax.plot(r, u0, '--r', label = 'Initial Profile')
-	p_update = ax.plot([], [], 'b', label = 'Time Evolution')[0]
-	ax.set(xlabel = 'r', ylabel = 'u(r, t)', ylim=(0,1))
-	ax.legend(loc = 'upper left')
-
-	# --- Update
-	def update(frame):
+	# --- Structure for 2d Surface
+	Nr = len(r) - 1
+	theta = np.linspace(0, 2*np.pi, Nr+1)
+	R, Theta = np.meshgrid(r, theta)
+	X = R*np.cos(Theta)
+	Y = R*np.sin(Theta)	
+	
+	def update(frame, zarray, plot):
 		tk = t[frame]
-		u = U[:, frame]
-		p_update.set_xdata(r)
-		p_update.set_ydata(u)
+		Uk = zarray[:, frame]
+		plot[0].remove()
+		plot[0] = ax.plot_surface(X, Y, Uk, cmap="copper")
 		ax.set(title=f'Time t = {tk:.2f} s')
-		return(p_update)
-	ani = manimation.FuncAnimation(fig=fig, func=update, 
-			frames=range(0, Nt+1, ktskip), interval=100)
-
+		return(plot)
+		
+	# --- Initialization
+	fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
+	plot = [ax.plot_surface(X, Y, uinit), cmap="copper", label='Surface']
+	ax.set(xlabel='x', ylabel = 'y')
+	ax.set(zlim=(0,1))
+	
+	ani = manimation.FuncAnimation(fig=fig, func=update
+			frames=range(0, Nt+1), fargs=[U, plot], interval=100)
 	plt.show()
 
 # =============================================================================
@@ -110,14 +114,14 @@ def doMovie(r, t, U, ktskip):
 # =============================================================================
 def CN_Fisher_w_Dirichlet_radial():
 	# --- Global parameters
-	R = 15 # or R = 5
+	R = 5 # or R = 5
 	D = 1
 	UR = 0
 	
 	# --- Discretization
 	Nr = 2**6
 	Nt = 2**8
-	tf = 1
+	tf = 8
 	r = np.linspace(0, R, Nr+1)
 	t = np.linspace(0, tf, Nt+1)
 	
