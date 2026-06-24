@@ -3,6 +3,7 @@
 Tube Diffusion
 
 We create the plots in Figure 5.1 of the text. We access the SciPy error function
+
 """
 
 # =============================================================================

@@ -5,7 +5,7 @@ Steady State Solutions
 We plot steady state solutions of the diffusion equation with Robin conditions
 represented by equation 5.24
 
-This script is based on steady_state_solutions.m
+This script is based on steady_state_solutions.m 
 """
 
 # =============================================================================

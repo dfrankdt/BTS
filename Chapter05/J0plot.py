@@ -7,7 +7,7 @@ functional library.
 
 Figures Produced: J0(r) as a function of 0 <= r <= 25.
 
-This script is basd on J0plot.m
+This script is basd on J0plot.m 
 
 """
 
