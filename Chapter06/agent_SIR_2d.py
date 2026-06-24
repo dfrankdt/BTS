@@ -8,7 +8,7 @@ but may interact according to S -> I with rate alpha
 Figures produced:
 	- Figure 1: Sample trajectories
 
-This script is based on agent_SIR_1d.py
+This script is based on agent_SIR_2d.py
 """
 # =============================================================================
 # Packages
@@ -112,12 +112,12 @@ def agent_SIR_2d():
 	Identify the parameters needed, run the simulation, do some plotting
 	"""
 
-	# -- Parameters -
+	# --- Parameters 
 	alpha = 1	# Rate constant for S -> I
 	D = 1		# Diffusion coefficient
 	L = 10		# Length of spatial interval
 	S0 = 1		# Density of S (particles per length) on 0 < x < L
-	Nt = 3000	# Number of time steps
+	Nt = 200	# Number of time steps
 	dt = 0.01	# Length of time step
 
 	s, t, x, y = xyReactDiff(alpha, D, L, S0, Nt, dt)
