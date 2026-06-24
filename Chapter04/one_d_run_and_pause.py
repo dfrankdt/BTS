@@ -11,6 +11,7 @@ Figures produced:
  - Figure 2: Mean Squared Displacement
 
 This script is based on one_d_run_and_pause.m
+
 """
 
 # =============================================================================

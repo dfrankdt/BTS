@@ -11,6 +11,7 @@ Figures produced:
  - Figure 2: Mean square displacement compared to theoretical
 
 This script is based on agent_based_run_and_tumble.m
+
 """
 
 # =============================================================================

@@ -11,6 +11,7 @@ Figures produced:
  - Figure 2: 
  
 This script is based on discrete_diffusion_via_Gillespie.m
+
 """
 
 # =============================================================================

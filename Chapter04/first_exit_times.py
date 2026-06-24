@@ -17,6 +17,7 @@ and mean first exit time as a function of the nonzero initial position 0 < x0 < 
 does not require the complete trajectory.
  
 This script is based on first_exit_times.m
+
 """
 
 import numpy as np

@@ -11,6 +11,7 @@ Figures produced:
  - Figure 2: Mean Squared Displacement (theoretical and actual)
 
 This script is based on one_d_direction_switcher.m
+
 """
 
 # =============================================================================

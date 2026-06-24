@@ -13,6 +13,7 @@ Figures produced
 Similar to first_exit_times.py, producing Figure 2 only requires returning the
 exit time, so we do not compute the trajectory in its entirety. 
 
+
 """
 
 # =============================================================================

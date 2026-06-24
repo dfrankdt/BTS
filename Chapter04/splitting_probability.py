@@ -6,6 +6,7 @@ We perform a random walk on the interval 0 < x < L, noting the distribution of
 leaving at x = L. We expect this distribution to be pi_L = x/L.
 
 This script is based on splitting_probability.m
+
 """
 
 # =============================================================================

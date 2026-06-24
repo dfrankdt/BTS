@@ -5,6 +5,7 @@ Single Particle Diffusion
 We simulate the diffusion of a single particle via Brownian motion.
 
 This script is based on single_particle_diffusion.m
+
 """
 
 # =============================================================================

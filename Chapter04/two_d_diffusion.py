@@ -16,6 +16,7 @@ we do not address how those results change as a function of D, leaving that
 instead for the exercises.
 
 This script is based on two_d_diffusion.m
+
 """
 
 # =============================================================================
