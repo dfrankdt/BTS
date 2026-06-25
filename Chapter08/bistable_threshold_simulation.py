@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
 """
-Crank-Nicolson scheme to simulate the Bistable equation. Below the simulation produces
-an animation.
+Bistable Threshold Simulation
 
-We note that the text uses initial data
+We identify the threshold behavior in the ODE associated with the traveling 
+wave. We use Crank-Nicolson to solve the PDE and plot frames based on certain.
 
- u0(x) = a sech^2(x/lam)
-
-and cites a traveling wave with lam = 4.2 at a = 0.42 but no traveling wave at a = 0.41
-We find that threshold to be slightly different, with no traveling wave at a = 0.40
-
-Note: This script is based on CN_Fisher.m
 """
 
 # =============================================================================
-#  Packages
+# Packages
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,6 +20,7 @@ import matplotlib.animation as manimation
 def F(u, alpha):
 	y = u * (1 - u) * (u - alpha)
 	return y
+
 # =============================================================================
 # Crank-Nicolson Method
 # =============================================================================
@@ -65,40 +60,15 @@ def doCN(x, t, uinit, alpha):
 	return U
 
 # =============================================================================
-# Create Movie
+# Create plots
 # =============================================================================
-def doMovie(x, t, U, ktskip):
-	# --- Initialize data structures
-	Nt = np.size(t) - 1
-	uinit = U[:,0]
-	uMax = np.max(U)
-	
-	# --- Initialize movie
-	fig, ax = plt.subplots()
-	p_init = ax.plot(x, uinit, '--r', label='Initial Profile')
-	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
-	ax.set(ylim=(0, 1))
-	ax.set(xlabel='x', ylabel='u(x, t)')
-	ax.legend(loc='upper right')
 
-	def update(frame):
-	    tk = t[frame]
-	    u = U[:, frame]
-	    p_update.set_xdata(x)
-	    p_update.set_ydata(u)
-	    ax.set(title=f'Time t = {tk:.2f} s')
-	    return(p_update)
-        
-	ani = manimation.FuncAnimation(fig=fig, func=update, 
-			frames=range(0, Nt+1, ktskip), interval=100)
-	plt.show()
 
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
-def CN_Bistable():
- 
-	# --- Parameters 
+def bistable_threshold_simulation():
+	# --- Parameters
 	L = 30			# Spatial Domain
 	Tf = 100		# End time
 	alpha = 0.25 	# Third zero of the cubic
@@ -109,25 +79,36 @@ def CN_Bistable():
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, dt*Nt, Nt+1)
 
-	# --- Initial profile for state variable (vary a to obtain a traveling wave)
-	a = 0.41
-	a = 0.39
+	# --- no traveling wave
+	a = 0.40
 	lam = 4.2
 	u0_profile = a*(1/np.cosh(x/lam))**2
-
-	# --- Perform Crank-Nicolson
 	U = doCN(x, t, u0_profile, alpha)
 
-	# --- Create Movie 
-	doMovie(x, t, U, 2**3)
+	fig, ax = plt.subplots()
+	ax.plot(x, u0_profile, '--r')
+	ax.set(xlabel = r'$\xi$', ylabel = r'u($\tau$, $\xi$)')
+	ax.set(ylim = (-0.1, 1.1))
+	for kt in range(0, Nt+1, 2**6):
+		ax.plot(x, U[:, kt])
+	plt.show()
+
+	# --- yes traveling wave
+	a = 0.41
+	lam = 4.2
+	u0_profile = a*(1/np.cosh(x/lam))**2
+	U = doCN(x, t, u0_profile, alpha)
+
+	fig, ax = plt.subplots()
+	ax.plot(x, u0_profile, '--r')
+	ax.set(xlabel = r'$\xi$', ylabel = r'u($\tau$, $\xi$)')
+	ax.set(ylim = (-0.1, 1.1))
+	for kt in range(0, Nt+1, 2**6):
+		ax.plot(x, U[:, kt])
+	plt.show()
 
 # =============================================================================
-# Execute the simulation if the script is run directly.
+# Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
-    CN_Bistable()
-
-
-
-
-
+    bistable_threshold_simulation()
