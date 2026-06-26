@@ -100,20 +100,20 @@ def CN_Bistable():
  
 	# --- Parameters 
 	L = 30			# Spatial Domain
-	Tf = 100		# End time
+	Tf = 50		# End time
 	alpha = 0.25 	# Third zero of the cubic
 
 	# --- Spatial and Temporal Scales 
-	Nt, Nx = 2**10, 2**7
+	Nt, Nx = 2**8, 2**6
 	dt, dx = Tf/Nt,  L/Nx
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, dt*Nt, Nt+1)
 
 	# --- Initial profile for state variable (vary a to obtain a traveling wave)
 	a = 0.41
-	a = 0.39
+#	a = 0.39
 	lam = 4.2
-	u0_profile = a*(1/np.cosh(x/lam))**2
+	u0_profile = 1*(1/np.cosh(x/lam))**2
 
 	# --- Perform Crank-Nicolson
 	U = doCN(x, t, u0_profile, alpha)
