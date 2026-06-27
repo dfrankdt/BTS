@@ -39,7 +39,7 @@ def de_rhs(t, y, c, alpha):
 def de_event(t, y, c, alpha):
 	# --- We keep our DE solution inside a box
 	u, w = y
-	z = w * (0.2 - w)
+	z = w * (0.3 - w)
 	return z
 de_event.terminal = 1
 de_event.direction = -1
@@ -71,7 +71,7 @@ def bistable_waves_pp():
 		y0 = [u0, w0]
 		IVP_args = [c, alpha]
 		soln = solve_ivp(de_rhs, [0, tmax], y0, args=IVP_args,
-			events=de_event,dense_output=True)
+			events=de_event, dense_output=True)
 		tz = max(soln.t)
 		print(soln.t_events)
 		t = np.linspace(0, tz, Nt+1)
