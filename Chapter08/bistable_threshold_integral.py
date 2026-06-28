@@ -34,14 +34,14 @@ def de_rhs(t, y, c, alpha):
 	dw = c*w - F(u, alpha)
 	dv = u
 	dy = np.array([du, dw, dv])
-	return y
+	return dy
 
 # =============================================================================
 # DE Event
 # =============================================================================
 def de_event(t, y, c, alpha):
 	u, w, v = y
-	z = w * (1 - u)
+	z = w * (1-u)
 	return z
 de_event.terminal = 1
 de_event.direction = -1
@@ -52,13 +52,12 @@ de_event.direction = -1
 def bistable_threshold_integral():
 	# --- Parameters
 	c = 0
-	alpha_list = np.linspace(0.1, 0.2, 3)
+	alpha_list = np.linspace(0.01, 0.5, 200)
 	Int_value = np.zeros(alpha_list.shape)
 
 	# --- ODE initialization
 	u0 = 0.001
-	tmax, Nt = 250, 2**8
-
+	tmax, Nt = 100, 2**8
 
 	fig, ax = plt.subplots()
 	ax.set(xlabel = r'$\alpha$', ylabel = r'$N_\alpha$')
@@ -71,12 +70,9 @@ def bistable_threshold_integral():
 		IVP_args = [c, alpha]
 		soln = solve_ivp(de_rhs, [0, tmax], y0, args=IVP_args,
 			events=de_event, dense_output=True)
-		print(soln.y)
-
-
-		U, W, IU = soln.y			
-		ax.plot(U, W)
-		#ax.plot(alpha_list, Int_value)
+		U, W, IU = soln.y
+		Int_value[kalpha] = 2*IU[-1]
+	ax.plot(alpha_list, Int_value)
 	
 	plt.show()
 
