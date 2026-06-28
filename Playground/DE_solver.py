@@ -31,7 +31,7 @@ def de_rhs(t, y, alpha):
 	u, v, w = y
 	du = v
 	dv = -alpha**2 * u
-	dw = u + v 
+	dw = np.abs(v) 
 	dy = np.array([du, dv, dw])
 	return dy
 
@@ -43,9 +43,8 @@ def v_zero(t, y, alpha):
 	z = v
 	return z
 
-v_zero.terminal = 1 # Trigger at first zero
-v_zero.direction = 1	# Ensure v is decreasing (change to 1 to get the full cycle)
-
+v_zero.terminal =  2	# Trigger at nth zero
+#v_zero.direction = -1	# Ensure v is decreasing
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
@@ -53,21 +52,27 @@ def DE_solver():
 	alpha = 3
 	tmax = 20
 
-	fig, ax = plt.subplots()
+	fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8.8, 6.4))
 	
-	u0_list = np.linspace(0.1, 0.5, 8)
+	u0_list = np.linspace(0.1, 0.5, 5)
 	IVP_args = [alpha]
 	for ju0 in range(len(u0_list)):
 		u0 = u0_list[ju0]
 		yinit = np.array([u0, 0, 0])
 		soln = solve_ivp(de_rhs, [0, tmax], yinit, args = IVP_args,
 				events = v_zero, dense_output = True)
+		# --- Solution structure on solver grid
+		ax1.plot(soln.y[0,], soln.y[1,], '.k')
+		# --- Interpret at finer grid
 		tf = max(soln.t)
 		t = np.linspace(0, tf, 2**8+1)
-		u, v, UI = soln.y
-		print(soln.sol)
-		ax.plot(u, v)
-		print(UI)
+		u, v, UI = soln.sol(t)
+		ax1.plot(u, v)
+		ax2.plot(u0, UI[-1], 'ok')
+		# --- Should be zero
+		print(soln.y[-1, -1] - UI[-1])
+		
+	ax2.plot(u0_list, 4*u0_list)
 	plt.show()
 
 
