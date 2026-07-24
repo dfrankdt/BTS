@@ -3,7 +3,10 @@
 Bistable Threshold Simulation
 
 We identify the threshold behavior in the ODE associated with the traveling 
-wave. We use Crank-Nicolson to solve the PDE and plot frames based on certain.
+wave. We use Crank-Nicolson to solve the PDE and plot frames.
+
+The spatial domain is slightly different than the text, but the figures 
+illustrate propagation failure and propagation, respectively.
 
 """
 
@@ -34,8 +37,8 @@ def doCN(x, t, uinit, alpha):
 	"""
 	dx = x[1]-x[0]
 	dt = t[1]-t[0]
-	Nx = np.size(x) - 1
-	Nt = np.size(t) - 1
+	Nx = len(x) - 1
+	Nt = len(t) - 1
 
 	U = np.zeros( (Nx+1, Nt+1) )
 	U[:,0] = uinit
@@ -62,7 +65,17 @@ def doCN(x, t, uinit, alpha):
 # =============================================================================
 # Create plots
 # =============================================================================
-
+def doPlot(x, t, U, ktskip):
+	Nt = len(t) - 1
+	uinit = U[:,0]
+	
+	fig, ax = plt.subplots()
+	ax.plot(x, uinit, '--r')
+	ax.set(xlabel = r'$\xi$', ylabel = r'u($\xi$, $\tau$)')
+	ax.set(ylim = (-0.1, 1.1))
+	for kt in range(ktskip, Nt+1, ktskip):
+		ax.plot(x, U[:, kt])
+	plt.show()
 
 # =============================================================================
 # Main Simulation Function
@@ -79,33 +92,19 @@ def bistable_threshold_simulation():
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, dt*Nt, Nt+1)
 
-	# --- no traveling wave
+	# --- Propagation failure (no traveling wave)
 	a = 0.40
 	lam = 4.2
 	u0_profile = a*(1/np.cosh(x/lam))**2
 	U = doCN(x, t, u0_profile, alpha)
+	doPlot(x, t, U, 2**6)
 
-	fig, ax = plt.subplots()
-	ax.plot(x, u0_profile, '--r')
-	ax.set(xlabel = r'$\xi$', ylabel = r'u($\tau$, $\xi$)')
-	ax.set(ylim = (-0.1, 1.1))
-	for kt in range(0, Nt+1, 2**6):
-		ax.plot(x, U[:, kt])
-	plt.show()
-
-	# --- yes traveling wave
+	# --- Propagation (traveling wave)
 	a = 0.41
 	lam = 4.2
 	u0_profile = a*(1/np.cosh(x/lam))**2
 	U = doCN(x, t, u0_profile, alpha)
-
-	fig, ax = plt.subplots()
-	ax.plot(x, u0_profile, '--r')
-	ax.set(xlabel = r'$\xi$', ylabel = r'u($\tau$, $\xi$)')
-	ax.set(ylim = (-0.1, 1.1))
-	for kt in range(0, Nt+1, 2**6):
-		ax.plot(x, U[:, kt])
-	plt.show()
+	doPlot(x, t, U, 2**6)
 
 # =============================================================================
 # Execute the simulation if the script is run directly
