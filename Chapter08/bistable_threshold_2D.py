@@ -78,7 +78,7 @@ def bistable_threshold_2D():
 
 	ax1.plot(alpha*np.ones(len(U)), U, '--')
 	ax1.annotate('', xy = (0.09, 0.225), xytext=(0.11, 0.225),
-                                arrowprops = dict(arrowstyle='-|>'))
+                                arrowprops = dict(arrowstyle='->', lw=2))
 	ax1.legend(loc='upper right')
 	ax2.legend(loc='upper right')
 

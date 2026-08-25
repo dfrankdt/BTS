@@ -61,7 +61,7 @@ def bistable_waves_pp():
 	ax.plot([0, 1], [0, 0], 'ok')
 	ax.set(xlabel = 'U', ylabel = 'W')
 	ax.annotate('', xytext = (0.45, 0.2), xy=(0.55, 0.2),
-                            arrowprops = dict(arrowstyle='-|>'))
+                            arrowprops = dict(arrowstyle='->', lw=2))
 
 #	ax.set(ylim=(-0.02, 0.2))
 	
