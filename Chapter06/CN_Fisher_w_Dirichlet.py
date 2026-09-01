@@ -6,11 +6,9 @@ We approximate the solution to Fisher's equation on 0 < x < L
 (dimensionless) with zero Dirichlet boundary data using two
 different values of L.
 
-TO DO
- - fix the initial profile
- - create snapshots
- - fine tune dt, dx
- - reread .m code
+Produces: As in Figure 6.7
+ - Animation showing time evolution of traveling wave (or not)
+ - Figure displaying time snapshots of traveling wave (or not)
  
 This script is based on CN_Fisher_w_Dirichlet.m 
 """
@@ -65,6 +63,7 @@ def doCN(x, t, uinit, D, BC):
 		U[:,kt+1] = ukp1
 		uk = ukp1
 	return U
+	
 # =============================================================================
 #  Create Animation
 # =============================================================================
@@ -72,7 +71,7 @@ def doMovie(x, t, U, ktskip):
 	Nt = len(t) - 1
 	u0 = U[:,0]
         
-	# Initialize movie
+	# --- Initialize animation
 	fig, ax = plt.subplots()
 	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
 	p_init = ax.plot(x, u0, '--r', label='Initial Profile')
@@ -80,6 +79,7 @@ def doMovie(x, t, U, ktskip):
 	ax.set(xlabel='x', ylabel='u(x, t)')
 	ax.legend(loc='upper left')
 
+	# --- Update frame
 	def update(frame):
 		tk = t[frame]
 		u = U[:, frame]
@@ -95,13 +95,34 @@ def doMovie(x, t, U, ktskip):
 	plt.show()
 
 # =============================================================================
+#  Create Snapshots
+# =============================================================================
+def doSnapshots(x, t, U):
+	# --- Initialize data structures, including snapshot frequency
+	ksnap = 2**4
+	dt = t[ksnap]
+	Nt = len(t) - 1
+	u0 = U[:,0]
+
+	# --- Initialize animation
+	fig, ax = plt.subplots()
+	ax.plot(x, u0, '--r', label='Initial Profile')
+	ax.set(ylim=(0,1))
+	ax.set(xlabel=r'$\xi$', ylabel=r'v($\xi$, t)')
+	
+	for kt in range(ksnap, Nt+1, ksnap):
+		u = U[:, kt]
+		ax.plot(x, u)
+	ax.set(title = f'Snapshots every t = {dt:1.2f} s')
+	plt.show()
+# =============================================================================
 #  Main Simulation Function
 # =============================================================================
 def CN_Fisher_w_Dirichlet():
-	# --- Global parameters
-	L = 2	# Below threshold for traveling wave
-	L = 5	# Above threshold for traveling wave
-	D = 1
+	# --- Global parameters: Choose a domain length to obtain a traveling wave
+	D = 1	# Diffusion coefficient (WLOG)
+##	L = 2	# Length 1: Below threshold for traveling wave
+	L = 5	# Length 2: Above threshold for traveling wave
 	
 	# --- Boundary Conditions
 	U0, UL = 0, 0
@@ -110,26 +131,26 @@ def CN_Fisher_w_Dirichlet():
 	Nx = 2**6
 	Nt = 2**9
 	dx = L/Nx
-	dt = 0.1
+	dt = 0.01
 	tf = dt*Nt
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, tf, Nt+1)
 
-	# --- Initial profile, pass boundary conditions to solver
-	u0_profile = np.tanh(x/(L/25)) * np.tanh(-(x - L)/(L/25))
-	u0_profile = (1 + np.tanh( (x - L/2)/(L/25) ))*(1 + np.tanh(-(x - L/2)/(L/25)))/8
+	# --- Choose an initial profile, pass boundary conditions to solver
 	BC = np.array([U0, UL])
-	
-	# --- Solution and animation
-	U = doCN(x, t, u0_profile, D, BC)
 
-	doMovie(x, t, U, 2**3)
+	# --- Profile 1: Falls to traveling wave
+	u0_profile = np.tanh(x/(L/25)) * np.tanh(-(x - L)/(L/25))
+	# --- Profile 2: Rises to traveling wave
+##	u0_profile = (1 + np.tanh( (x - L/2)/(L/25) ))*(1 + np.tanh(-(x - L/2)/(L/25)))/5
+	
+	# --- Solution, animation, and snapshots
+	U = doCN(x, t, u0_profile, D, BC)
+	doMovie(x, t, U, 2**2)
+	doSnapshots(x, t, U)
 
 # =============================================================================
 # Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
 	CN_Fisher_w_Dirichlet()
-
-
-
