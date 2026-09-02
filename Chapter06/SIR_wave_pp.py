@@ -67,6 +67,7 @@ def SIR_wave_pp():
 	ax.plot(snc, unc, '--y')
 	ax.plot([0, 1.2], [0, 0], '--g')
 	ax.set(xlim=(0, 1.2), ylim=(-0.05, 0.2))
+	ax.annotate(r'$S^*$', xytext= (0.25, -0.025), xy = (0.5, -0.025))
 	ax.legend()
 
 

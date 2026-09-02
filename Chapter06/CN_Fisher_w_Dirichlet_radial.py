@@ -5,8 +5,7 @@ CN Scheme to the 2D Fisher Equation (radial symmetry)
 We solve the two-dimensional Fisher equation, leveraging radial symmetry, using
 Crank-Nicolson
 
-TO DO
- - Fix the second difference operator
+TO DO: Fix the second difference operator
 """
 
 # =============================================================================

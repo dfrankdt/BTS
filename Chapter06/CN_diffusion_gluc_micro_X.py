@@ -8,6 +8,8 @@ given in section 6.3.  Here we simulate the full non-scaled model on 0 < x < L
 for 0 < t < tf.
 
 Note: This script is based on CN_diffusion_gluc_micro_X.m
+
+TO DO: Create snapshots (maybe?)
 """
 import numpy as np
 import matplotlib.pyplot as plt
