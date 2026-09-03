@@ -5,7 +5,7 @@ CN Scheme to the 2D Fisher Equation (radial symmetry)
 We solve the two-dimensional Fisher equation, leveraging radial symmetry, using
 Crank-Nicolson
 
-TO DO: Fix the second difference operator
+TO DO: Does the initial profile really matter? Probably choose one.
 """
 
 # =============================================================================
@@ -25,7 +25,7 @@ def F(u):
 # =============================================================================
 # CN Solve
 # =============================================================================
-def doCN(r, t, uinit, D, UR):
+def doCN(r, t, uinit, D):
 	"""
 	Crank-Nicolson to simulate the Fisher equation with radial symmetry
 	
@@ -38,47 +38,38 @@ def doCN(r, t, uinit, D, UR):
 	Nr = len(r) - 1
 	Nt = len(t) - 1
 	
-	# --- Interior discretizations
-	rp = (r[2:Nr+1] + r[1:Nr])/2
-	rm = (r[1:Nr] + r[0:Nr-1])/2
-	
 	# --- Second derivative operator
-	D2p = rp[0:Nr-2]/r[1:Nr-1]
-	D2m = rm[1:Nr-1]/r[2:Nr]
-	D2 = -2*np.eye(Nr-1) + np.diag(D2p, k=1) + np.diag(D2m, k=-1)
+	cm = np.linspace(1, Nr-1, Nr-1)
+	cp = np.linspace(0, Nr-2, Nr-1)
+	cp[0] = 1/2		# Adjust for zero flux at r = 0
+	D2p = np.diag(1 + 1/(2*cp), k=1)
+	D2m = np.diag(1 - 1/(2*cm), k=-1)
 
+	D2 = D2m - 2*np.eye(Nr) + D2p
+	
 	# --- Matrices for CN
 	gam = D*dt/(dr**2)
-	Acn = np.eye(Nr-1) - (gam/2)*D2
-	Bcn = np.eye(Nr-1) + (gam/2)*D2
+	Acn = np.eye(Nr) - (gam/2)*D2
+	Bcn = np.eye(Nr) + (gam/2)*D2
 	
 	# --- Initialization
 	U = np.zeros( (Nr+1, Nt+1) )
 	U[:, 0] = uinit
 	
 	# --- Steps
-	uk = uinit
+	uk = uinit[0:Nr]
 	for kt in range(Nt):
-		# --- Incorporate boundary condition at r=0, r=R
-		zbc = np.zeros(Nr-1)
-		zbc[0] = gam * (rm[0]/r[1])*uk[0]
-		zbc[-1] = gam * (rp[-1]/r[-2])*UR
-
-		y = Bcn@uk[1:Nr] + zbc + dt*F(uk[1:Nr])
-		ukp1 = np.zeros(Nr+1)
-		ukp1[1:Nr] = np.linalg.solve(Acn, y)
-		
-		# --- Enforce boundary condition at r=0, r=R
-		ukp1[0] = ukp1[1]
-		ukp1[-1] = UR
-
-		U[:, kt+1] = ukp1
+		# --- Solve the linear system, CN on Laplacian, forward Euler on F(u)
+		y = Bcn@uk + dt*F(uk)
+		ukp1 = np.linalg.solve(Acn, y)
+		# --- Record solution and step forward
+		U[0:Nr, kt+1] = ukp1
 		uk = ukp1
 	return U
 # =============================================================================
-# Animation
+# Animations
 # =============================================================================
-def doMovie(r, t, U, ktskip):
+def do3dMovie(r, t, U, ktskip):
 	uinit = U[:,0]
 	Nt = len(t) - 1
 
@@ -108,14 +99,43 @@ def doMovie(r, t, U, ktskip):
 	
 	ani = manimation.FuncAnimation(fig=fig, func=update,
 			frames=range(0, Nt+1, ktskip), fargs=[U, plot], interval=100)
-	plt.show()
+	return ani
 
+def do2dMovie(r, t, U, ktskip):
+	uinit = U[:,0]
+	Nt = len(t) - 1
+
+	# --- Structure for curve
+	Nr = len(r) - 1
+	
+	# --- Initialization
+	fig, ax = plt.subplots()
+	p_init = ax.plot(r, uinit, '--r', label = 'Initial Profile')
+	p_update = ax.plot([], [], 'b', label = 'Time Evolution')[0]
+	ax.set(xlabel='r', ylabel = 'u(r, t)')
+	ax.set(ylim = (0, 1))
+	ax.legend(loc = 'upper right')
+
+	# --- Animation update
+	def update(frame):
+		tk = t[frame]
+		uk = U[:, frame]
+		p_update.set_xdata(r)
+		p_update.set_ydata(uk)
+		ax.set(title=f'Time t = {tk:.2f} s')
+		return(p_update)
+		
+	
+	ani = manimation.FuncAnimation(fig=fig, func=update,
+			frames=range(0, Nt+1, ktskip), interval=100)
+	return ani
+	
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
 def CN_Fisher_w_Dirichlet_radial():
 	# --- Global parameters
-	R = 1 # or R = 10
+	R = 4 # or R = 10
 	D = 1
 	UR = 0
 	
@@ -127,10 +147,16 @@ def CN_Fisher_w_Dirichlet_radial():
 	t = np.linspace(0, tf, Nt+1)
 	
 	# --- Initial profile
+	u0_profile = 0.2*np.exp(-(r-R/2)**2)
+	u0_profile = 1 - np.tanh( (r - 0.8)/(1/20))
+	u0_profile = 0.01 * (1 - np.tanh((r**2)/(1/20)))
 	u0_profile = 0.2*np.exp(-r**2)
-	U = doCN(r, t, u0_profile, D, UR)
-	doMovie(r, t, U, 2**3)
-
+	u0_profile[-1] = UR
+	U = doCN(r, t, u0_profile, D)
+	ani2d = do2dMovie(r, t, U, 2**3)
+	ani3d = do3dMovie(r, t, U, 2**3)
+	
+	plt.show()
 
 # =============================================================================
 # Execute the simulation if the script is run directly
