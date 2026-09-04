@@ -8,8 +8,10 @@ Figures produced
 	- Figure 1: position after 100 time steps
 	- Figure 2: mean squared displacement as a function of time step n compared to theory
 	- Figure 3: comparison of histogram to Gaussian
+
+TO DO: Seems weird that each run has one bin that fails to fit the gaussian
 	
-That this code is based on discrete_random_walk.m 
+This code is based on discrete_random_walk.m 
 """
 
 # =============================================================================
@@ -31,16 +33,16 @@ def discrete_random_walk():
 	alpha = 0.1		# probability of moving left
 	beta = alpha	# probability of moving right
 	N = 2000		# trials
-	ns = 100		# number of steps
+	Ns = 100		# number of steps
 	
 	# --- Simulation tools
-	X = np.zeros( (N, ns+1) )				# Positions
-	tsteps = np.arange(ns+1)				# Steps 
+	X = np.zeros( (N, Ns+1) )				# Positions
+	tsteps = np.arange(Ns+1)				# Steps 
 	c = np.array([alpha, alpha + beta, 1]) 	# vector to determine direction
 	xm = np.array([-1, 1, 0])				# vector to move L, R, to stay put
 	
 	# --- Pass through the ns steps
-	for j in tsteps-1:
+	for j in range(Ns):
 		R = rng.random(N)
 		mL = np.where(R<c[0], np.ones(np.size(R)), np.zeros(np.size(R)))
 		mR = np.where((R>c[0])*(R<c[1]), np.ones(np.size(R)), np.zeros(np.size(R)))
@@ -54,7 +56,7 @@ def discrete_random_walk():
 	XeDist, bins = np.histogram(X[:,-1], bins='auto', density=True)
 	bin_center = (bins[:-1] + bins[1:])/2
 	z = np.linspace(-15, 15, 2**9+1)
-	p = 1/(np.sqrt(4*np.pi*alpha*ns)) * np.exp(-z**2/(4*alpha*ns))
+	p = 1/(np.sqrt(4*np.pi*alpha*Ns)) * np.exp(-z**2/(4*alpha*Ns))
 	
 	# --- Do some plotting
 	fig1, ax1 = plt.subplots()
@@ -69,8 +71,8 @@ def discrete_random_walk():
 	ax2.legend(loc='upper left')
 	
 	fig3, ax3 = plt.subplots()
-	ax3.plot(bin_center, XeDist, '.', label='Actual')
-	#ax3.stairs(XeDist, bins, fill=True)
+#	ax3.plot(bin_center, XeDist, '.', label='Actual')
+	ax3.stairs(XeDist, bins, fill=False, label='Actual')
 	ax3.plot(z, p, label='Theoretical')
 	ax3.set(xlabel = 'End Position', ylabel = 'Density')
 	ax3.legend(loc='upper right')
