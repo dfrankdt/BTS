@@ -8,8 +8,6 @@ given in section 6.3.  Here we simulate the full non-scaled model on 0 < x < L
 for 0 < t < tf.
 
 Note: This script is based on CN_diffusion_gluc_micro_X.m
-
-TO DO: Create snapshots (maybe?)
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -103,11 +101,12 @@ def doCN(x, t, u0_profile, g0_profile, Du, Dg, alpha):
 # Create Movie
 # =============================================================================
 def doMovie(x, t, U, G):
+	# --- Initialize Variables
 	u0 = U[:,0]
 	g0 = G[:,0]
 	Nt = np.size(t) - 1
 
-	# Initialize movie
+	# --- Initialize animation
 	fig, (ax1, ax2) = plt.subplots(2, 1)
 	p1_init = ax1.plot(x, u0, '--r', label='Initial Profile, u')
 	p2_init = ax2.plot(x, g0, '--r', label='Initial Profile, g')
@@ -118,6 +117,7 @@ def doMovie(x, t, U, G):
 	ax2.set(xlabel = 'x', ylabel = r'$g(x, t)$', ylim=(0,1))
 	ax2.legend(loc='upper left')
 
+	# --- Update animation
 	def update(frame):
 	    tk = t[frame]
 	    u = U[:, frame]
@@ -131,7 +131,33 @@ def doMovie(x, t, U, G):
         
 	ani = manimation.FuncAnimation(fig=fig, func=update, 
 		frames=range(Nt+1), interval=100)
-	plt.show()
+	return ani
+
+# =============================================================================
+# Snapshots
+# =============================================================================
+def doSnaps(x, t, U, G):
+	# --- Initialize Variables
+	u0 = U[:,0]
+	g0 = G[:,0]
+	Nt = np.size(t) - 1
+
+	# --- Initialize snapshots
+	fig, (ax1, ax2) = plt.subplots(2, 1)
+	ax1.plot(x, u0, '--r', label='Initial Profile, u')
+	ax2.plot(x, g0, '--r', label='Initial Profile, g')
+		
+	for kt in range(2**2, Nt+1, 2**2):
+		uk = U[:, kt]
+		gk = G[:, kt]
+		ax1.plot(x, uk)
+		ax2.plot(x, gk)
+	
+	ax1.set(ylabel=r'$u(x, t)$', ylim=(0,1))
+	ax2.set(xlabel = 'x', ylabel = r'$g(x, t)$', ylim=(0,1))
+	ax1.set(title = 'Snapshots')
+	
+	return fig, ax1, ax2
 
 # =============================================================================
 # Main Simulation Function
@@ -145,7 +171,7 @@ def CN_diffusion_gluc_micro_X():
 	Dg = 0.1
 
 	# -- Spatial and Temporal Scales
-	tend = 400
+	tend = 750
 	Nt, Nx = 2**5, 2**7
 	dt, dx = tend/Nt,  L/Nx
 	x = np.linspace(0, L, Nx+1)
@@ -158,8 +184,11 @@ def CN_diffusion_gluc_micro_X():
 	# -- Perform Crank-Nicolson
 	U, G = doCN(x, t, u0_profile, g0_profile, Du, Dg, alpha)
 
-	# -- Create Movie
-	doMovie(x, t, U, G)	
+	# -- Create Movie/Snapshots
+	ani = doMovie(x, t, U, G)	
+	fig, ax1, ax2 = doSnaps(x, t, U, G)
+	
+	plt.show()
 
 # =============================================================================
 # Execute the simulation if the script is run directly.

@@ -13,8 +13,7 @@ the (N-1) x (N-1) interior points.
 
 According to Ch 6 analysis, the threshold is mu = L^2 alpha/D = 2 pi^2.
 
-TO DO:
- - Possibly incorporate the initial profile in the movie
+TO DO: Possibly incorporate the initial profile in the movie
 """
 
 # =============================================================================
