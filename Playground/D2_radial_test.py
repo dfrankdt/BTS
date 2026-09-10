@@ -19,8 +19,6 @@ for which the second derivative in space satisfies
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as manimation
-
 
 # =============================================================================
 # Second Difference Operator
@@ -40,11 +38,9 @@ def D2_polar(r, u):
 	D2 = D2 + np.diag( D2p, k=1) + np.diag(D2m, k=-1)
 
 	# --- Adjust at boundaries
-#	D2[0, 0] = D2[0, 0] + rm[0]/r[1]
 	D2u = 1/dr**2 * (D2@u[1:Nr])
 	D2u[-1] = D2u[-1] + 1/dr**2 * (rp[-1]/r[-2]*u[-1])
 	D2u[0] = D2u[0] + 1/dr**2 * (rm[0]/r[1]*u[0])
-	print(np.linalg.cond(D2))
 	return D2u
 
 # =============================================================================
