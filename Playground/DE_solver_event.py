@@ -2,7 +2,7 @@
 """
 DE Solver using events
 
-This is a test script to see how the event switch works in ivp_solve.
+This is a test script to see how the event switch works in solve_ivp.
 
 I'm going to solve
 
@@ -41,8 +41,8 @@ def v_zero(t, y):
 	z = v
 	return z
 
-v_zero.terminal = True	# Trigger at first zero
-v_zero.direction = 1	# Ensure v is decreasing (change to 1 to get the full cycle)
+v_zero.terminal = True	# Terminate at zero
+v_zero.direction = -1	# Ensure v is decreasing (change to 1 to get the full cycle)
 
 # =============================================================================
 # Main Simulation Function
