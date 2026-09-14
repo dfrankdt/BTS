@@ -9,7 +9,8 @@ Figures produced
 	- Figure 2: mean squared displacement as a function of time step n compared to theory
 	- Figure 3: comparison of histogram to Gaussian
 
-TO DO: Seems weird that each run has one bin that fails to fit the gaussian
+TO DO: Seems weird that each run has one bin that fails to fit the gaussian, not
+sure why this is happening.
 	
 This code is based on discrete_random_walk.m 
 """
