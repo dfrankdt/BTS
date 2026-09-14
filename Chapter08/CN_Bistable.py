@@ -10,7 +10,6 @@ We note that the text uses initial data
 and cites a traveling wave with lam = 4.2 at a = 0.42 but no traveling wave at a = 0.41
 We find that threshold to be slightly different, with no traveling wave at a = 0.40
 
-Note: This script is based on CN_Fisher.m
 """
 
 # =============================================================================
@@ -91,7 +90,7 @@ def doMovie(x, t, U, ktskip):
         
 	ani = manimation.FuncAnimation(fig=fig, func=update, 
 			frames=range(0, Nt+1, ktskip), interval=100)
-	plt.show()
+	return ani
 
 # =============================================================================
 # Main Simulation Function
@@ -109,17 +108,21 @@ def CN_Bistable():
 	x = np.linspace(0, L, Nx+1)
 	t = np.linspace(0, dt*Nt, Nt+1)
 
-	# --- Initial profile for state variable (vary a to obtain a traveling wave)
+	# --- Get a traveling wave
 	a = 0.42
-#	a = 0.39
 	lam = 4.2
 	u0_profile = a*(1/np.cosh(x/lam))**2
-
-	# --- Perform Crank-Nicolson
 	U = doCN(x, t, u0_profile, alpha)
+	ani_wave = doMovie(x, t, U, 2**3)
+	
+	# --- Get failed wave
+	a = 0.39
+	lam = 4.2
+	u0_profile = a*(1/np.cosh(x/lam))**2
+	U = doCN(x, t, u0_profile, alpha)
+	ani_fail = doMovie(x, t, U, 2**3)
 
-	# --- Create Movie 
-	doMovie(x, t, U, 2**3)
+	plt.show()
 
 # =============================================================================
 # Execute the simulation if the script is run directly.

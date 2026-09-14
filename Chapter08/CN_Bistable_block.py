@@ -90,7 +90,7 @@ def doMovie(x, t, U, ktskip):
         
 	ani = manimation.FuncAnimation(fig=fig, func=update, 
 			frames=range(0, Nt+1, ktskip), interval=100)
-	plt.show()
+	return ani
 
 
 # =============================================================================
@@ -105,8 +105,7 @@ def doPlot(x, t, U, ktskip):
 	ax.set(xlabel = r'$\xi$', ylabel = r'u($\xi$, $\tau$)')
 	for kt in range(ktskip, Nt+1, ktskip):
 		ax.plot(x, U[:, kt])
-	plt.show()
-
+	return fig, ax
 
 # =============================================================================
 # Main Simulation Function
@@ -135,15 +134,18 @@ def CN_Bistable_block():
 	# --- Propagation: Solve, animate, graph
 	Yb = 2.8
 	U = doCN(x, t, u0_profile, alpha, kappa, Xb, Yb)
-	doMovie(x, t, U, 2**3)
-	doPlot(x, t, U, 2**4)
+	ani_wave = doMovie(x, t, U, 2**3)
+	fig_wave, ax_wave = doPlot(x, t, U, 2**4)
+	ax_wave.set(title = 'Propagation Success')
 
 	# --- Propagation Failure: Solve, animate, graph
 	Yb = 2.9
 	U = doCN(x, t, u0_profile, alpha, kappa, Xb, Yb)
-	doMovie(x, t, U, 2**3)
-	doPlot(x, t, U, 2**4)
+	ani_block = doMovie(x, t, U, 2**3)
+	fig_block, ax_block = doPlot(x, t, U, 2**4)
+	ax_block.set(title = 'Propagation Failure')
 
+	plt.show()
 # =============================================================================
 # Execute the simulation if the script is run directly.
 # =============================================================================
