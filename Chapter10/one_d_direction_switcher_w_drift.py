@@ -7,8 +7,8 @@ randomly switches direction by an exponential process with rate constants
 kplus and kminus.
 
 Figures produced:
- - Figure 1: Sample Trajectory
- - Figure 2: Mean Squared Displacement (theoretical and actual)
+ - Figure 1: Sample Trajectories
+ - Figure 2: Root Mean Squared Displacement (theoretical and actual)
 
 We leverage the Chapter 04 one_d_direction_switcher.py to create this simulation
 """
