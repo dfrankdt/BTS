@@ -2,12 +2,6 @@
 """
 TBI Block:
 
-Figures produced:
- - Figure 1: Trajectory (U-W plane), see Figure 8.6(a)
- - Figure 2: Trajectory (xi-U plane), see Figure 8.6(b)
- - Figure 3: Length of curve Y as a function of U(0), see Figure 8.7(a)
- - Figure 4: Critical blocking
-
 """
 
 # =============================================================================
