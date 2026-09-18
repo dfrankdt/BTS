@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TBI Block:
+Discrete Bistable via Method of Lines:
 
 """
 
@@ -14,39 +14,51 @@ import matplotlib.animation as manimation
 rng = np.random.default_rng()
 
 # =============================================================================
-# Function Definitions
+# Nonlinearity
 # =============================================================================
-def f(x, zeros):
+def f(x, a):
 	# --- Cubic nonlinearity
-	x0, x1, x2 = zeros
-	y = (x-x0)*(x1-x)*(x-x2)
+	y = x*(1 - x)*(x - a)
 	return y
 
-def F(x, a):
-	# --- Integral of the cubic nonlinearity
-	y = -(x**4/4 - (a+1)/3*x**3 + a/2*x**2)
-	return y
-
+# =============================================================================
+# DE Structure
+# =============================================================================
+def de_rhs(t, u, pars):
+	a, d = pars
+	n = len(u)
+	d2u = np.zeros(n)
+	d2u[1:n-1] = d*(u[0:n-2] - 2*u[1:n-1] + u[2:n])
+	d2u[0] = d*(-2*u[0] + u[1])
+	d2u[-1] = d*(u[-2] - 2*u[-1])
+	du = d2u + f(u, a)
+	return du
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
-def TBI_block():
+def discrete_bistable_via_MOL():
 	# --- Parameters
-	Ar = 1
+	d = 0.2
+	alpha = 0.25
+	n = 14
+		
+	# --- Solution structure
+	tend = 300
+	u0 = np.zeros(n)
+	u0[0:5] = 0.5
+	IVP_args = [alpha, d]
+
+	soln = solve_ivp(de_rhs, [0, tend], u0, args = [IVP_args], dense_output = True)
+	t = np.linspace(0, tend, 2**8+1)
+	u = soln.sol(t).T
 	
-	alpha_list = [0.4, 0.3, 0.25]
-	for ka in range(len(alpha_list)):
-		alpha = alpha_list[ka]
-		U0, U1, U2 = 0, alpha, 1
-		zeros = [U0, U1, U2]
-		du = np.linspace(U0, U2, 2**15+1)
-		FU2 = np.trapezoid(f(du, zeros), du)
-		print(FU2)
-		print(F(U2, alpha))
-
-
+	fig, ax = plt.subplots()
+	ax.plot(t, u[:,8:-1])
+	
+	plt.show()
+	
 # =============================================================================
 # Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
-    TBI_block()
+    discrete_bistable_via_MOL()
