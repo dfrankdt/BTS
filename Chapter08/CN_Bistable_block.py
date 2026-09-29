@@ -6,7 +6,12 @@ by equations (8.37) and (8.38). Below the simulation produces an animation.
 We place a block of width Yb at location Xb. We find that that varying the width
 of the block from 2.8 to 2.9 causes propagation failure.
 
-Note: This script is based on CN_Bistable.m
+Figures Produced:
+ - Figure 1: Animation illustrating propagation success
+ - Figure 2: Snapshots from propagation success
+ - Figure 3: Animation illustrating propagation failure
+ - Figure 4: Snapshots from propagation failure
+
 """
 
 # =============================================================================
@@ -77,7 +82,7 @@ def doMovie(x, t, U, ktskip):
 	p_init = ax.plot(x, uinit, '--r', label='Initial Profile')
 	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
 	ax.set(ylim=(0, 1))
-	ax.set(xlabel='x', ylabel='u(x, t)')
+	ax.set(xlabel=r'$\xi$', ylabel=r'u($\xi$, $\tau$)')
 	ax.legend(loc='upper right')
 
 	def update(frame):
@@ -134,15 +139,15 @@ def CN_Bistable_block():
 	# --- Propagation: Solve, animate, graph
 	Yb = 2.8
 	U = doCN(x, t, u0_profile, alpha, kappa, Xb, Yb)
-	ani_wave = doMovie(x, t, U, 2**3)
-	fig_wave, ax_wave = doPlot(x, t, U, 2**4)
+	ani_wave = doMovie(x-15, t, U, 2**3)
+	fig_wave, ax_wave = doPlot(x-15, t, U, 2**4)
 	ax_wave.set(title = 'Propagation Success')
 
 	# --- Propagation Failure: Solve, animate, graph
 	Yb = 2.9
 	U = doCN(x, t, u0_profile, alpha, kappa, Xb, Yb)
-	ani_block = doMovie(x, t, U, 2**3)
-	fig_block, ax_block = doPlot(x, t, U, 2**4)
+	ani_block = doMovie(x-15, t, U, 2**3)
+	fig_block, ax_block = doPlot(x-15, t, U, 2**4)
 	ax_block.set(title = 'Propagation Failure')
 
 	plt.show()
