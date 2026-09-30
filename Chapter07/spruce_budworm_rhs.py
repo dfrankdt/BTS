@@ -5,6 +5,12 @@ Spruce Budworm
 We plot the nonlinearities on right-hand side of the Spruce Budworm PDE (7.2)
 to illustrate bistability of the system.
 
+Produces:
+ - Figure 1: Difference between growth and decay rates, fg - fd, as a function
+   of the dimensionless parameter u/(K S), for varying sigma see Figure 7.1(a)
+ - Figure 2: Division of kappa - sigma parameter space to illustrate bifurcation
+   of number of zeros in fg - fd (Region I: one zero; Region II: three zeros),
+   see Figure 7.1(b)
 """
 
 # =============================================================================
@@ -20,7 +26,6 @@ def R(x, y):
 	R = 4*y**2*(y**2 + 1)**2*x**3
 	R = R + 4*y**2*(3*y**2 - 5)*x**2
 	R = R + (12*y**2 - 1)*x + 4
-#	R = y**2*(y**2+1)**2*x**3+ y**2*(3*y**2-5)*y**2 +(3* y**2-1/4)*y+1
 	return R
 
 # =============================================================================

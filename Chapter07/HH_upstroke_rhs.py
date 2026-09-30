@@ -5,6 +5,9 @@ Hodgkin Huxley Upstroke
 We illustrate bistability of the Hodgkin-Huxley equations by plotting the 
 right-hand side.
 
+Produces:
+ - Figure 1: Ion current, I_ion as a function of voltage, see Figure 7.3
+ - Text: estimate of three zeros of I_ion by examining changes in sign
 """
 
 # =============================================================================
@@ -54,7 +57,10 @@ def HH_upstroke_rhs():
 	ax.plot(V[ndx], Ion_current(V[ndx]), 'o')
 	ax.set(xlabel='V (mV)', ylabel = r'-I$_{\text{ion}}$(V) ($\mu$A/cm$^2$)')
 
-	print(f'Zeros of the Ion Current occur at V = {V[ndx][0]:1.2f}, {V[ndx][1]:1.2f}, and {V[ndx][2]:1.2f} mV')
+	print(f'Zeros of the Ion Current occur at 
+		V = {V[ndx][0]:1.2f}, 
+			{V[ndx][1]:1.2f}, and 
+			{V[ndx][2]:1.2f} mV')
 	plt.show()
 
 

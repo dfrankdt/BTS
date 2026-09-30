@@ -2,7 +2,10 @@
 """
 CICR: Calcium induced calcium release
 
-Bistability in CICR
+Bistability in CICR.
+
+Produces
+ - Figure 1: Total flux as a function of Ca++ concentration, see Figure 7.4
 
 """
 
