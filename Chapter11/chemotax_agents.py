@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Agent Based Chemotaxis: Run and tumble where probability of switching to 
-tumbling (koff) is a function of an external gradient
+tumbling (koff) may be a function of an external gradient.
 
 Produces
  - Figure 1: Position of Np particles after Nt timesteps in case of zero (blue)
