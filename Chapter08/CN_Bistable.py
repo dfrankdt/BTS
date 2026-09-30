@@ -10,6 +10,9 @@ We note that the text uses initial data
 and cites a traveling wave with lam = 4.2 at a = 0.42 but no traveling wave at a = 0.41
 We find that threshold to be slightly different, with no traveling wave at a = 0.40
 
+Produces:
+ - Figure 1: Animation illustrating propagation of traveling wave
+ - Figure 2: Animation illustrating propagation failure
 """
 
 # =============================================================================

@@ -7,7 +7,14 @@ two-dimensional bistable equation given by
 
   1/xi (xi u')' + f(u) = 0
 
-We use a planar system where the initial value is given by a small value of xi
+We use a planar system where the initial value is given by a small value of xi.
+
+Produces:
+ - Figure 1: Trajectories in the u - u' plane for different values of a.
+   Critical value of alpha producing the saddle-saddle connection is determined
+   by shooting, see Figure 8.4(a)
+ - Figure 2: u as a function of the traveling wave coordinate xi for different
+   values of a, see Figure 8.4(b)
 """
 
 # =============================================================================
@@ -49,16 +56,21 @@ de_event.direction = -1
 # Main Simulation Function
 # =============================================================================
 def bistable_threshold_2D():
+	# --- Parameters
 	a_list = [0.23, 0.2438355, 0.25]
 	alpha = 0.1
-	ximax = 1000
 	
+	# --- Initialize IVP
+	ximax = 1000
 	IVP_args = [alpha]
+	
+	# --- Initialize plots
 	fig1, ax1 = plt.subplots()
 	ax1.set(xlabel = 'u', ylabel = 'w')
 	fig2, ax2 = plt.subplots()
 	ax2.set(xlabel=r'$\xi$', ylabel = r'u($\xi$)')
-	
+
+	# --- Step through values of a
 	for ka in range(len(a_list)):
 		a = a_list[ka]
 		xi0 = 1e-6
@@ -71,14 +83,17 @@ def bistable_threshold_2D():
 		xif = max(soln.t)
 		xi = np.linspace(xi0, xif, 2**8+1)
 		U, W, IU = soln.sol(xi)
+		
+		# --- Plot for this a value
 		ax1.plot(U, W, label=f'a = {a:1.5f}')
 		ax2.plot(xi, U, label=f'a = {a:1.5f}')
 		if ka==1:
 			print(f'The value of the definite integral is {2*np.pi*IU[-1]:1.4f}')
 
+	# --- Plot alpha
 	ax1.plot(alpha*np.ones(len(U)), U, '--')
 	ax1.annotate('', xy = (0.09, 0.225), xytext=(0.11, 0.225),
-                                arrowprops = dict(arrowstyle='->', lw=2))
+                    arrowprops = dict(arrowstyle='->', lw=2))
 	ax1.legend(loc='upper right')
 	ax2.legend(loc='upper right')
 

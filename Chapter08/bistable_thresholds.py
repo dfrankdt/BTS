@@ -6,6 +6,10 @@ We illustrate thresholds beyond which the Bistable Equation exhibits traveling
 wave behavior.  We simulate the Bistable Equation for a range of length constants
 and check whether the solution increases (i.e. becomes a traveling wave) or decays
 from its initial profile.
+
+Produces:
+ - Figure 1: critical curves in amplitude of traveling wave as a function of
+   length constant lambda for different values of alpha, see Figure 8.3(a)
 """
 
 # =============================================================================
@@ -72,30 +76,17 @@ def doWaveCheck(x, t, D, alpha, a, lam):
 	return z
 
 # =============================================================================
-# Main Simulation Function
+# Sub/Super Threshold Plot
 # =============================================================================
-def bistable_thresholds():
-	# --- Parameters
-	L = 30
-	D = 1
-	tf = 50
-	
-	# --- Constants in initial profile to loop
-	alpha_list = np.array([0.4,  0.25, 0.1])
-	lam_list = np.linspace(0.1, 10, 50)
-	
-	# --- Discretization
-	Nx = 2**6
-	Nt = 2**8
-	x = np.linspace(0, L, Nx+1)
-	t = np.linspace(0, tf, Nt+1)
-	
-	# --- Test through alpha values
-	fig,ax = plt.subplots()
+def doThreshold(x, t, D, alpha_list, lam_list):
+	# --- Initialize plot
+	fig, ax = plt.subplots()
 	ax.set(xlabel = r'length constant, $\lambda$', ylabel='Amplitude')
-	ax.text(1, 0.1, 'subthreshold')#, size=12)
-	ax.text(3.5, 0.8, 'superthreshold')#, size=12)
+	ax.text(1, 0.1, 'subthreshold')
+	ax.text(3.5, 0.8, 'superthreshold')
 	ax.set(ylim=(0, 1))
+
+	# --- Test through alpha values
 	for kalpha in range(len(alpha_list)):
 		critical_a = np.zeros(len(lam_list))
 		alpha = alpha_list[kalpha]
@@ -114,16 +105,39 @@ def bistable_thresholds():
 				critical_a[klam] = mpc
 			else:
 				critical_a[klam] = 0
+			
 			# --- Remove superfluous values
 			klam_threshold = np.nonzero(critical_a)
+
+		# --- Graph bifurcation curve
 		ax.plot(lam_list[klam_threshold], critical_a[klam_threshold],
 			label=rf'$\alpha$ = {alpha:1.2f}')
 	ax.legend(loc='upper right')
+	return fig, ax
+
+# =============================================================================
+# Main Simulation Function
+# =============================================================================
+def bistable_thresholds():
+	# --- Parameters
+	L = 30
+	D = 1
+	tf = 50
+	
+	# --- Constants in initial profile to loop
+	alpha_list = np.array([0.4,  0.25, 0.1])
+	lam_list = np.linspace(0.1, 10, 50)
+	
+	# --- Discretization
+	Nx = 2**6
+	Nt = 2**8
+	x = np.linspace(0, L, Nx+1)
+	t = np.linspace(0, tf, Nt+1)
+	
+	# --- Get threshold curves
+	fig, ax = doThreshold(x, t, D, alpha_list, lam_list)
 	plt.show()
 			
-			# --- Check traveling wave, record
-			
-
 # =============================================================================
 # Execute the simulation if the script is run directly
 # =============================================================================

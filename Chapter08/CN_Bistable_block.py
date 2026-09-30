@@ -8,9 +8,9 @@ of the block from 2.8 to 2.9 causes propagation failure.
 
 Figures Produced:
  - Figure 1: Animation illustrating propagation success
- - Figure 2: Snapshots from propagation success
+ - Figure 2: Snapshots from propagation success, see Figure 8.5(a)
  - Figure 3: Animation illustrating propagation failure
- - Figure 4: Snapshots from propagation failure
+ - Figure 4: Snapshots from propagation failure, see Figure 8.5(b)
 
 """
 

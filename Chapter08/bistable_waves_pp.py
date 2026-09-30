@@ -5,9 +5,13 @@ Bistable Traveling Waves
 We identify trajectories that yield traveling waves in the bistable equation
 by examining the phase plane of the resulting ODE system.
 
-TO DO
- - Work to obtain the saddle-saddle trajectory in the case c = c_crit
-"""
+Produces:
+ - Figure 1: Trajectories in the U-W phase plane, illustrating shooting arguement
+   to find saddle-saddle connection, see Figure 8.2(a)
+ - Figure 2: Profile of traveling wave solution with critical wavespeed c*, see
+   Figure 8.2(b)
+ 
+ """
 
 # =============================================================================
 # Packages
@@ -57,16 +61,13 @@ def bistable_waves_pp():
 	tmax, Nt = 100, 2**8
 	
 	# --- Plot initialization
-	fig, ax = plt.subplots()
-	ax.plot([0, 1], [0, 0], 'ok')
-	ax.set(xlabel = 'U', ylabel = 'W')
-	ax.annotate('', xytext = (0.45, 0.2), xy=(0.55, 0.2),
+	fig1, ax1 = plt.subplots()
+	ax1.plot([0, 1], [0, 0], 'ok')
+	ax1.set(xlabel = 'U', ylabel = 'W')
+	ax1.annotate('', xytext = (0.45, 0.2), xy=(0.55, 0.2),
                             arrowprops = dict(arrowstyle='->', lw=2))
 
-#	ax.set(ylim=(-0.02, 0.2))
-	
-	
-	# --- Simulations
+	# --- Simulations: varying wavespeed c
 	for kc in range(len(c_list)):
 		c = c_list[kc]
 		lam = (-c + np.sqrt(c**2 + 4*alpha))/2
@@ -76,13 +77,11 @@ def bistable_waves_pp():
 		soln = solve_ivp(de_rhs, [0, tmax], y0, args=IVP_args,
 			events=de_event, dense_output=True)
 		tz = max(soln.t)
-		print(soln.t_events)
 		t = np.linspace(0, tz, Nt+1)
 		U, W = soln.sol(t)
-		ax.plot(U, W, label = f'c = {c:1.2f}')
+		ax1.plot(U, W, label = f'c = {c:1.2f}')
 	
-	# --- Critical value 
-	c = np.sqrt(2)*(1/2 - alpha)
+	# --- Critical value: wavespeed c*
 	c = 0.566662
 	lam = (-c + np.sqrt(c**2 + 4*alpha))/2
 	w0 = lam*u0
@@ -93,17 +92,19 @@ def bistable_waves_pp():
 	tz = max(soln.t)
 	t = np.linspace(0, tz, Nt+1)
 	U, W = soln.sol(t)
-	ax.plot(U, W, '--', label = f'c = c$^*$')
+	ktmax = np.argmax(W)
+	t0 = t[ktmax]
 
-	ax.legend(loc='upper right')
-	plt.show()
+	ax1.plot(U, W, '--', label = f'c = c$^*$')
+	ax1.legend(loc='upper right')
 	
 	# --- Trajectories in the xi plane
-	fig, ax = plt.subplots()
-	ax.plot(t, U, label=r'U($\xi$)')
-	ax.plot(t, W, label=r'W($\xi$)')
-	ax.set(xlabel=r'$\xi$')
-	ax.legend()
+	fig2, ax2 = plt.subplots()
+	ax2.plot(t - t0, U, label=r'U($\xi$)')
+	ax2.plot(t - t0, W, label=r'W($\xi$)')
+	ax2.set(xlabel=r'$\xi$')
+	ax2.legend()
+
 	plt.show()
 
 # =============================================================================

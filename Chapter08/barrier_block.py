@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Barrier Block: When f is a cubic nonlinearity we can patch the solution together
-exactly. In the case that f is cubic-like, we need a numerical approach
+exactly. In the case that f is cubic-like, we need a numerical approach, which
+is not illustrated here
 
 Figures produced:
  - Figure 1: Trajectory (U-W plane), see Figure 8.6(a)
@@ -36,6 +37,9 @@ def Fzero(a):
 	xc = 2*(a+1)/3 - np.sqrt( 2*(2*a - 1)*(a - 2) )/3
 	return xc
 
+# =============================================================================
+# Rootfinding Routines
+# =============================================================================
 def getUY(a, k, Us, Ws):
 	# --- Find intersection of trajectories via Newton's Method
 	g0 = F(1, a) - 1/2*Ws**2 + k/2*Us**2
@@ -53,7 +57,10 @@ def getUY(a, k, Us, Ws):
 		uk = ukp1
 	wk = np.sqrt(2*(F(1, a) - F(uk, a)))
 	return uk, wk
-	
+
+# =============================================================================
+# Intermediate Trajectory
+# =============================================================================
 def getBlockTraj(a, k, Us, Ws):
 	# --- Identify the trajectory satisfying U'' - kappa U = 0, U(0) = Us, W(0) = Ws
 	UY, WY = getUY(a, k, Us, Ws)
@@ -83,7 +90,6 @@ def w_zero(x, z, a):
 
 w_zero.terminal = True
 w_zero.direction = -1
-
 	
 # =============================================================================
 # Figure 8.6 (a)
@@ -113,8 +119,8 @@ def getFig86a(alpha, kappa, Us, Ws):
 	ax.plot(u, w, '--y')
 
 	# --- Annotations
-	ax.annotate('U(0)', xy = (Us-0.05, Ws-0.02))
-	ax.annotate('U(Y)', xy = (UY+0.02, WY))
+	ax.text(Us - 0.05, Ws - 0.02, 'U(0)')
+	ax.text(UY + 0.02, WY, 'U(Y)')
 	return fig
 
 # =============================================================================
@@ -160,8 +166,8 @@ def getFig86b(alpha, kappa, Us, Ws):
 	ax.plot(t, u)
 	
 	# --- Annotations
-	ax.annotate('(0, U(0))', xy = (1, Us))
-	ax.annotate('(Y, U(Y))', xy = (Y+1, Uy))
+	ax.text(1, Us, '(0, U(0))')
+	ax.text(Y+1, Uy, '(Y, U(Y))')
 	return fig
 
 # =============================================================================
@@ -218,8 +224,8 @@ def getFig87b(klist):
 		ax.plot(alist, Ycrit, label = rf'$\kappa = ${kappa:1.3f}')
 	ax.legend(loc = 'upper right')
 	ax.set(ylim = (0, 20))
-	ax.annotate('propagation failure', xy=(0.3, 10))
-	ax.annotate('propagation success', xy = (0.05, 3))
+	ax.text(0.3, 10, 'propagation failure')
+	ax.text(0.05, 3, 'propagation success')
 	return fig
 
 # =============================================================================

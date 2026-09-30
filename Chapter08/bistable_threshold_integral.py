@@ -9,7 +9,10 @@ a traveling wave.
 This integral is given by equation (8.23). We compute the value of the integral
 by solving an initial value problem.
 
-"""
+Produces:
+ - Figure 1: Threshold quantity N_alpha as a function of alpha, see Figure 8.3(b)
+ 
+ """
 
 # =============================================================================
 # Packages
@@ -59,9 +62,11 @@ def bistable_threshold_integral():
 	u0 = 0.001
 	tmax, Nt = 100, 2**8
 
+	# --- Figure initialization
 	fig, ax = plt.subplots()
 	ax.set(xlabel = r'$\alpha$', ylabel = r'$N_\alpha$')
 
+	# --- Step through alpha values
 	for kalpha in range(len(alpha_list)):
 		alpha = alpha_list[kalpha]
 		lam = (-c + np.sqrt(c**2 + 4*alpha))/2
@@ -72,8 +77,9 @@ def bistable_threshold_integral():
 			events=de_event, dense_output=True)
 		U, W, IU = soln.y
 		Int_value[kalpha] = 2*IU[-1]
+
+	# --- Do the plotting
 	ax.plot(alpha_list, Int_value)
-	
 	plt.show()
 
 # =============================================================================

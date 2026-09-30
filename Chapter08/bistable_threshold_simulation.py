@@ -8,6 +8,14 @@ wave. We use Crank-Nicolson to solve the PDE and plot frames.
 The spatial domain is slightly different than the text, but the figures 
 illustrate propagation failure and propagation, respectively.
 
+Produces:
+ - Figure 1: Snapshots illustrating propagation failure of traveling wave, 
+   see Figure 8.1(a)
+ - Figure 2: Snapshots illustrating propagation of traveling wave, see
+   Figure 8.1(b)
+
+Note that animations are produced by CN_Bistable.py
+
 """
 
 # =============================================================================
