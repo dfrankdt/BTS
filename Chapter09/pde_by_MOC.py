@@ -1,12 +1,26 @@
 #!/usr/bin/env python3
 """
-Upwinding via Method of Lines: This script solves the pde
+PDE by Method of Characteristics: We solve
 
-  du/dt + d/dx (vu) = 0
+ du/dt + f(x, t, u) du/dx = g(x, t, u)
+ 
+by first identifying a characteristic curve x = X0(t0), u(X0(t0), t0) = U0(t0) 
+then using the chain rule to identify that along any such characteristic
 
-where the initial profile is given by u0 and the velocity is prescribed
-by a general form v = v(x, t, u). Below we can prescribe the initial profile
-and the velocity.
+ dX/dt = f(X, t, u)
+ du/dt = g(X, t, u)
+
+Note that the general conservation form
+
+ du/dt + d/dx(vu) = 0
+ 
+gives rise to
+
+ du/dt + v du/dx = -(dv/dx) u
+ 
+so that f(x, t, u) = v and g(x, t, u) = -(dv/dx) but the solution may be better
+approximated by upwinding instead.
+
 
 Produces: Animation illustrating the solution on the timeframe
 """
@@ -20,55 +34,58 @@ from scipy.integrate import solve_ivp
 import matplotlib.animation as manimation
 
 # =============================================================================
-# Velocity
+# Nonlinearities
 # =============================================================================
-def v(x, t, u):
-	vel = 1/2
-#	vel = x
-	vel = 1/2*u
-	return vel
+"""
+Note that
+ - f = c, g = 0 gives rise to du/dt + c du/dx = 0
+ - f = x, g = -1 gives rise to du/dt + d/dx (xu) = 0
+ - f = 2u, g = 0 gives rise to du/dt + d/dx(u*u) = 0
+all of which may be captured by upwinding.
+"""
+def f(x, t, u):
+	y = 1/2*np.ones(len(x))
+	#y = x
+	y = u
+	return y
+
+def g(x, t, u):
+	y = np.zeros(len(x))
+	#y = -u
+	y = np.zeros(len(x))
+	return y
 
 # =============================================================================
-# Right-hand Side of the Differential Equation
+# IVP RHS
 # =============================================================================
-def de_rhs(t, u, x):
-	# --- u, x have Nx + 1 entries. 
-	Nx = len(x) - 1
-	dx = x[1] - x[0]
+def de_rhs(t, z):
+	# --- Identify x, u from z
+	Nx = int(len(z)/2 - 1)
+	u = z[:Nx+1]
+	x = z[Nx+1:]
 	
-	# --- Need the flux J = v*u, but first need half step values for x and u 
-	xjmh = np.zeros(Nx+2)
-	xjmh[:-1] = x - dx/2
-	xjmh[-1] = x[-1] + dx/2
+	# --- Use nonlinearities to compute dx, du
+	du = g(x, t, u)
+	dx = f(x, t, u)
+	
+	# --- Construct dz
+	dz = np.zeros(2*(Nx+1))
+	dz[:Nx+1] = du
+	dz[Nx+1:] = dx
+	return dz
 
-	um = np.zeros(Nx+2)
-	um[:-1] = u
-	up = np.zeros(Nx+2)
-	up[1:] = u
-	
-	ujmh = (um+up)/2
-
-	# --- Call the velocity and get the flux, be sure to upwind.	
-	vjmh = v(xjmh, t, ujmh)
-	Jmh = vjmh*( (vjmh>0)*up + (vjmh<0)*um )
-	
-	# --- Now get the difference
-	dJ = Jmh[1:] - Jmh[:-1]
-	du = -dJ/dx
-	
-	return du
-	
 # =============================================================================
 # Create Movie
 # =============================================================================
-def doMovie(x, t, U):
+def doMovie(X, t, U):
 	# --- Initialize data structures
 	Nt = len(t) - 1
 	uinit = U[:,0]
+	xinit = X[:,0]
 
 	# --- Initialize movie
 	fig, ax = plt.subplots()
-	p_init = ax.plot(x, uinit, 'r', label='Initial Profile')
+	p_init = ax.plot(xinit, uinit, 'r', label='Initial Profile')
 	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
 	ax.set(xlabel='x', ylabel='u(x, t)')
 	ax.legend(loc='upper right')
@@ -77,7 +94,8 @@ def doMovie(x, t, U):
 	def update(frame):
 		tk = t[frame]
 		uk = U[:, frame]
-		p_update.set_xdata(x)
+		xk = X[:, frame]
+		p_update.set_xdata(xk)
 		p_update.set_ydata(uk)
 		ax.set(title=f'Time t = {tk:.2f} s')
 		return(p_update)
@@ -88,23 +106,28 @@ def doMovie(x, t, U):
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
-def pde_upwind_MOL():
+def pde_by_MOC():
 	# --- Discretizations
 	L, Nx = 1, 2**5
-	x = np.linspace(0, L, Nx+1)
-	u0 = x*(1-x)
+	x0 = np.linspace(0, L, Nx+1)
+	u0 = x0*(1-x0)
 	
-	# --- Set the ODE
+	# --- Set the ODEs
 	tf, Nt = 1, 20
-	soln = solve_ivp(de_rhs, [0, tf], u0, args=[x], dense_output=True)
-
-	# --- Structure to produce visualization
+	z0 = np.zeros(2*(Nx+1))
+	z0[:Nx+1] = u0
+	z0[Nx+1:] = x0
+	
+	soln = solve_ivp(de_rhs, [0, tf], z0, dense_output = True)
 	t = np.linspace(0, tf, Nt+1)
-	U = soln.sol(t)
-	doMovie(x, t, U)
+	z = soln.sol(t)
+	U = z[:Nx+1,:]
+	X = z[Nx+1:, :]
+	print(np.shape(U))	
+	doMovie(X, t, U)
 
 # =============================================================================
 # Execute the simulation if the script is run directly
 # =============================================================================
 if __name__ == "__main__":
-    pde_upwind_MOL()
+    pde_by_MOC()
