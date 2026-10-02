@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """
-Upwinding via Method of Lines
+Upwinding via Method of Lines: This script solves the pde
 
-This is not yet correct
+  du/dt + d/dx (vu) = 0
+
+where the initial profile is given by u0 and the velocity is prescribed
+by a general form v = v(x, t, u). Below we can prescribe the initial profile
+and the velocity.
+
+
 """
 
 # =============================================================================
@@ -14,31 +20,40 @@ from scipy.integrate import solve_ivp
 import matplotlib.animation as manimation
 
 # =============================================================================
+# Velocity
+# =============================================================================
+def v(x, t, u):
+	vel = x
+	return vel
+
+# =============================================================================
 # Right-hand Side of the Differential Equation
 # =============================================================================
 def de_rhs(t, u, x):
+	# --- u, x have Nx + 1 entries. 
 	Nx = len(x) - 1
-	dx = x[-1]/Nx
+	dx = x[1] - x[0]
 	
-	# --- Flux J = v*u, 
+	# --- Need the flux J = v*u, but first need half step values for x and u 
 	xjmh = np.zeros(Nx+2)
 	xjmh[:-1] = x - dx/2
 	xjmh[-1] = x[-1] + dx/2
+
+	um = np.zeros(Nx+2)
+	um[:-1] = u
+	up = np.zeros(Nx+2)
+	up[1:] = u
 	
-	ujmh = np.zeros(Nx+2)
-	ujmh[1:-1] = (u[:-1] + u[1:])/2
-	ujmh[0] = u[0]/2
-	ujmh[-1] = u[-1]/2
+	ujmh = (um+up)/2
+
+	# --- Call the velocity and get the flux, be sure to upwind.	
+	vjmh = v(xjmh, t, ujmh)
+	Jmh = vjmh*( (vjmh>0)*up + (vjmh<0)*um )
 	
-	vjmh = xjmh
-	ujm1 = np.zeros(Nx+2)
-	ujm1[1:] = u
+	# --- Now get the difference
+	dJ = Jmh[1:] - Jmh[:-1]
+	du = -dJ/dx
 	
-	uj = np.zeros(Nx+2)
-	uj[:-1] = u
-	Jmh = vjmh*ujm1*(vjmh>0) + vjmh*uj*(vjmh<0)	
-	dJmh = (Jmh[:-1] - Jmh[1:])/dx
-	du = dJmh
 	return du
 	
 # =============================================================================
@@ -53,7 +68,6 @@ def doMovie(x, t, U):
 	fig, ax = plt.subplots()
 	p_init = ax.plot(x, uinit, 'r', label='Initial Profile')
 	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
-	p_exact = ax.plot([], [], 'g', label='Exact')[0]
 	ax.set(xlabel='x', ylabel='u(x, t)')
 	ax.legend(loc='upper right')
 
@@ -63,8 +77,6 @@ def doMovie(x, t, U):
 		uk = U[:, frame]
 		p_update.set_xdata(x)
 		p_update.set_ydata(uk)
-		p_exact.set_xdata(x)
-		p_exact.set_ydata( (x-tk)*(1-x+tk) )
 		ax.set(title=f'Time t = {tk:.2f} s')
 		return(p_update)
 
@@ -76,7 +88,7 @@ def doMovie(x, t, U):
 # =============================================================================
 def pde_upwind_MOL():
 	# --- Discretizations
-	Nx = 2**7
+	Nx = 2**5
 	L = 1
 	x = np.linspace(0, L, Nx+1)
 	u0 = x*(1-x)
