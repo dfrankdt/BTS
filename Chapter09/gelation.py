@@ -19,6 +19,13 @@ from scipy.integrate import solve_ivp
 import matplotlib.animation as manimation
 
 # =============================================================================
+# Nonlinearity (Initial Profile)
+# =============================================================================
+def W(x, C0, k):
+	Wofz = C0*k*(x - x**(k-1))
+	return Wofz
+
+# =============================================================================
 # Velocity
 # =============================================================================
 def v(x, t, u):
@@ -99,9 +106,13 @@ def doSnapShots(x, t, U):
 # =============================================================================
 # Exact Solution
 # =============================================================================
-def doExact(x, t, U):
+def doExact(z0, t, C0, k):
 	# --- Initialize data structures
-	Nt = len(t) - 1
+	Nt = len(t)-1
+	Nx = len(x) - 1
+	w = np.array( (Nx+1, Nt+1) )
+	
+	
 	
 # =============================================================================
 # Main Simulation Function
@@ -116,7 +127,7 @@ def pde_upwind_MOL():
 	k = 3
 
 	# --- Initial Profile	
-	w0 = k*C0*(z-z**2)
+	w0 = W(z, C0, k)
 	
 	# --- Set the ODE
 	tf, Nt = 1.5, 15
@@ -127,6 +138,9 @@ def pde_upwind_MOL():
 	W = soln.sol(t)
 	ani = doMovie(z, t, W)
 	fig, ax = doSnapShots(z, t, W)
+	
+	# --- Exact Solution
+	W = doExact(
 	plt.show()
 
 # =============================================================================
