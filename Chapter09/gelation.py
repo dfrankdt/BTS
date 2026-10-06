@@ -104,15 +104,44 @@ def doSnapShots(x, t, U):
 	return fig, ax
 
 # =============================================================================
+# Rootfinding
+# =============================================================================
+def getz0(C0, k, t):
+	# --- Rootfinding to identify z0 for which z = 1
+	xa, fa = 0, -1
+	xb, fb = 0.9999, W(xb, C0, k)*t + xb - 1
+	
+	for iter in range(20):
+		xc = (xa+xb)/2
+		fc = w(xc, C0, k)*t + xc - 1
+		
+		ftest = ((fc*fa) > 0)
+		xa = ftest*xc + (1-ftest)*xa
+		fa = ftest*fc + (1-ftest)*xa
+		xb = (1-ftest)*xc + ftest*xb
+		fb = (1-ftest)*fc + ftest*fb
+	return xc
+
+# =============================================================================
 # Exact Solution
 # =============================================================================
-def doExact(z0, t, C0, k):
+def doExact(x, t, C0, k):
 	# --- Initialize data structures
-	Nt = len(t)-1
+	Nt = len(t) - 1
 	Nx = len(x) - 1
 	w = np.array( (Nx+1, Nt+1) )
+	z = np.array( Nx+1 )
 	
+	fig, ax = plt.subplots()
+	w[:, 0] = W(x, C0, k)
+	z[:] = x
+	ax.plot(w, W[:, 0], '--')
+	for kt in range(Nt):
+		z[:] = W(x, C0, k)*t[kt] + x
+#		z_end = getz0(t[kt], C0, k)
+#		w
 	
+	return fig, ax	
 	
 # =============================================================================
 # Main Simulation Function
@@ -135,12 +164,12 @@ def pde_upwind_MOL():
 
 	# --- Structure to produce visualization
 	t = np.linspace(0, tf, Nt+1)
-	W = soln.sol(t)
-	ani = doMovie(z, t, W)
-	fig, ax = doSnapShots(z, t, W)
+	Wappx = soln.sol(t)
+#	ani = doMovie(z, t, Wappx)
+	fig, ax = doSnapShots(z, t, Wappx)
 	
 	# --- Exact Solution
-	W = doExact(
+	fig_ex, ax_ex = doExact(z, t, C0, k)
 	plt.show()
 
 # =============================================================================
