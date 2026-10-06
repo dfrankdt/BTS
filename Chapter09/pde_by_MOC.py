@@ -40,17 +40,17 @@ import matplotlib.animation as manimation
 Note that
  - f = c, g = 0 gives rise to du/dt + c du/dx = 0
  - f = x, g = -1 gives rise to du/dt + d/dx (xu) = 0
- - f = 2u, g = 0 gives rise to du/dt + d/dx(u*u) = 0
+ - f = 2u, g = 0 gives rise to du/dt + d/dx(u*u) = 0 (i.e. Burgers Equation)
 all of which may be captured by upwinding.
 """
 def f(x, t, u):
-	y = 1/2*np.ones(len(x))
+	#y = 1/2*np.ones(len(x))
 	#y = x
-	y = u
+	y = 2*u
 	return y
 
 def g(x, t, u):
-	y = np.zeros(len(x))
+	#y = np.zeros(len(x))
 	#y = -u
 	y = np.zeros(len(x))
 	return y
@@ -110,7 +110,11 @@ def pde_by_MOC():
 	# --- Discretizations
 	L, Nx = 1, 2**5
 	x0 = np.linspace(0, L, Nx+1)
-	u0 = x0*(1-x0)
+	#u0 = x0*(1-x0)
+
+	# --- Parameters and initial profile to solve Burgers equation in 9.5.2
+	C0, k = 2/3, 3
+	u0 = k*C0*(x0 - x0**(k-1))  
 	
 	# --- Set the ODEs
 	tf, Nt = 1, 20
@@ -123,7 +127,6 @@ def pde_by_MOC():
 	z = soln.sol(t)
 	U = z[:Nx+1,:]
 	X = z[Nx+1:, :]
-	print(np.shape(U))	
 	doMovie(X, t, U)
 
 # =============================================================================
