@@ -9,7 +9,7 @@ by a general form v = W/2 in order to give Burgers equation.
 
 Produces: 
 
-TO DO: Start with doGel
+TO DO: Check whether we get Figure 9.8 (a) and (b).  
 """
 
 # =============================================================================
@@ -143,7 +143,6 @@ def doChars(x, t, C0, k):
 	w = W(x, C0, k)
 	for kx in range(len(x)):
 		ax.plot([x[kx], w[kx]*t[-1] + x[kx]], [0, t[-1]])
-		
 
 	# --- Use non-zero values of t, compute z via resultant
 	tnz = t[1:]
@@ -157,21 +156,24 @@ def doChars(x, t, C0, k):
 # Rootfinding
 # =============================================================================
 def getz0(C0, k, t):
-	# --- Rootfinding to identify z0 for which z = 1
-	xa = 0 
-	fa = -1
-	xb = 0.9999
-	fb = W(xb, C0, k)*t + xb - 1
-	
-	for iter in range(20):
-		xc = (xa+xb)/2
-		fc = W(xc, C0, k)*t + xc - 1
+	# --- Check if we expect a double-valued function W	
+	if (t <= 1/(C0*k*(k-2))):
+		xc = 1
+	else:
+		# --- Rootfinding to identify z0 for which z = 1
+		xa = 0 
+		fa = W(xa, C0, k)*t + xa - 1
+		xb = 0.9999
+		fb = W(xb, C0, k)*t + xb - 1
+		for iter in range(20):
+			xc = (xa+xb)/2
+			fc = W(xc, C0, k)*t + xc - 1
 		
-		ftest = ((fc*fa) > 0)
-		xa = ftest*xc + (1-ftest)*xa
-		fa = ftest*fc + (1-ftest)*xa
-		xb = (1-ftest)*xc + ftest*xb
-		fb = (1-ftest)*fc + ftest*fb
+			ftest = ((fc*fa) > 0)
+			xa = ftest*xc + (1-ftest)*xa
+			fa = ftest*fc + (1-ftest)*fa
+			xb = (1-ftest)*xc + ftest*xb
+			fb = (1-ftest)*fc + ftest*fb
 	return xc
 
 # =============================================================================
@@ -190,23 +192,35 @@ def de_rhsW(x, y, p):
 # =============================================================================
 def doGel(C0, k, tend):
 	# --- Structures
-	t = np.linspace(0, tend, 2**+1)
+	t = np.linspace(0, tend, 2**7+1)
 	W_Int = np.zeros(len(t))
 	W1 = np.zeros(len(t))
 
 	for kt in range(len(t)):
+		# --- Identify z0* such that W(z0*)t + z0* = 1
 		xend = getz0(C0, k, t[kt])
+		
+		# --- Identify W(z0*)
+		W1[kt] = W(xend, C0, k)
+		
+		# --- Solve an IVP to find the integral of W(z, t)
 		tspan = [0, xend]
 		IVPW_pars = [C0, k, t[kt]]
 		soln = solve_ivp(de_rhsW, tspan, [0], args = [IVPW_pars], t_eval=[xend])
-		print(soln.y[0][0])
 
 		W_Int[kt] = soln.y[0][0]
-		W1[kt] = W(xend, C0, k)
 	
+	# --- Identify the resultant and related quantities
 	R = 3*C0/(3*C0*t + 1)
+	Rs = R - W1
+	
+	# --- Do the plotting
 	fig, ax = plt.subplots()
-	ax.plot(t, W1)
+	ax.plot(t, W1, 'g', label = r'$R_g$')
+	ax.plot(t, 2*W_Int - W1, 'r', label = r'$M_1$')
+	ax.plot(t, Rs, 'k', label = r'$R_s$')
+	ax.plot(t, R, '--k', label = r'$R$')
+	ax.legend(loc = 'upper right')
 	
 	return fig, ax
 		
