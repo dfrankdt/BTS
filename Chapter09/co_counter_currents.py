@@ -3,7 +3,8 @@
 Co and Counter Currents: We compute the transfer fraction as a function of
 residence length
 
-TO DO: Fix the legend it's trash
+Produces
+ - Figure 1: Illustration of transfer fraction as a function of residence length
 """
 
 # =============================================================================
@@ -19,11 +20,14 @@ def co_counter_currents():
 	# --- Parameters
 	L = np.linspace(0, 5, 2**9+1)
 	rho_list = np.array([0.5, 2.0])
+	colorlist = ['b', 'g']
 	
 	# --- Initialize Plot
 	fig, ax = plt.subplots()
-	Co_plt = ax.plot([], [], '--k', label = 'Cocurrent')
-	Cntr_plt = ax.plot([], [], '-k', label = 'Countercurrent')
+	Cntr_plt, = ax.plot([], [], '-k', label = 'Countercurrent')
+	Co_plt, = ax.plot([], [], '--k', label = 'Cocurrent')
+	ax.legend(handles = [Cntr_plt, Co_plt], loc = 'upper left')
+	ax.set(xlabel = r'Residence length, $dL/v_1$', ylabel = 'Transfer Fraction')
 	
 	# --- Step through rho values
 	for kp in range(len(rho_list)):
@@ -40,11 +44,12 @@ def co_counter_currents():
 		c2cL = rho*(EcL - 1)/(EcL - rho)
 		
 		# --- Do the plotting
-		ax.plot(L, c2L, '--')
-		ax.plot(L, c2cL, '-')
+		ax.plot(L, c2L, '--', color = colorlist[kp])
+		ax.plot(L, c2cL, '-', color = colorlist[kp])
 	
-#	ax.legend(handles = [Co_plt, Cntr_plt], loc = 'upper right')
-	ax.set(xlabel = r'Residence length, $dL/v_1$', ylabel = 'Transfer Friction')
+	# --- Annnotate	
+	ax.text(2.5, 0.375, rf'$\rho = ${rho_list[0]:1.2f}')
+	ax.text(2.5, 0.725, rf'$\rho = ${rho_list[1]:1.2f}')
 	plt.show()
 
 
