@@ -10,6 +10,7 @@ NOTE probably add some titles, fig 9.2 needs more work
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
 
 # =============================================================================
 # Nonlinearity
@@ -18,6 +19,21 @@ def F(N):
 	# --- Hill Function
 	y = 1/(1 + N**7)
 	return y
+
+# =============================================================================
+# DE RHS
+# =============================================================================
+def de_rhs(t, y, p):
+	X, d, A, dx, dy, M, N = p
+	n0 = A*F(s[M])
+	n = np.zeros(N+2)
+	n[0] = n0
+	n[1:] = y[M+1:]
+	
+	N0 = 
+	
+	dy = np.zeros(len(y))
+	
 
 # =============================================================================
 # Figure 9.1
@@ -67,10 +83,12 @@ def do_Fig_9_2(d, X, A):
 	
 	
 	# --- Figure (b)
-	Nn, dx = 2**7, X/Nn
-	Nm = 2**4, d/Nm
+	Nn= 2**7
+	dx = X/Nn
+	Nm = 2**4
+	dm = d/Nm
 	tspan = np.linspace(0, 500, 501)
-	s0 = [np.ones(Nm, 1), np.ones(Nn, 1)*dx/X)
+	s0 = [np.ones(Nm, 1), np.ones(Nn, 1)*dx/X]
 	soln = solve_ivp(de_rhs, tspan, s0)
 	S = soln.sol(tspan)
 	
