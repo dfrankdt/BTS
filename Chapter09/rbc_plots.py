@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
 """
-RBC_plots: We create plots that look like figure 9.1 (more soon). 
+RBC_plots: Analysis to illustrate elements of a red blood cell production cycle.
+The main result is a Hopf bifurcation, after which total number of cells in 
+circulation becomes periodic. 
 
-NOTE probably add some titles, fig 9.2 needs more work
+Produces:
+ - Figure 1: Intersection of curves showing unique solution to equation (9.42), see
+   Figure 9.1(a)
+ - Figure 2: A decrease in cell death age gives a decrease in cell population
+   coupled with an increase in the production of cells, see Figure 9.1(b)
+ - Figure 3: Bifurcation diagram showing the Hopf bifurcation curve in the X/d
+   (ratio of lifetime to delay) -- dA (product of rate and delay) plane, 
+   see Figure 9.2(a)
+ - Figure 4: Time dependent solution in region where solution is periodic,
+   see Figure 9.2(b)
+   
 """
 
 # =============================================================================
@@ -23,17 +35,25 @@ def F(N):
 # =============================================================================
 # DE RHS
 # =============================================================================
-def de_rhs(t, y, p):
-	X, d, A, dx, dy, M, N = p
-	n0 = A*F(s[M])
-	n = np.zeros(N+2)
-	n[0] = n0
-	n[1:] = y[M+1:]
+def de_rhs(t, z, p):
+	# --- Identify parameters, state variables
+	A, Nu, dx, NU, dy = p
+	U = z[:NU+1]
+	u = z[NU+1:]
 	
-	N0 = 
+	# --- Reprogram u0, U0
+	u[0] = A*F(U[-1])
+	U[0] = np.sum(u[0:Nu-1] + 2*u[1:Nu] + u[2:Nu+1])*(dx/2)
 	
-	dy = np.zeros(len(y))
+	# --- Identify fluxes
+	Ju = -(u[1:Nu+1] - u[0:Nu])/dx
+	JU = -(U[1:NU+1] - U[0:NU])/dy
 	
+	# --- Identify RHS
+	dz = np.zeros( (NU+1) + (Nu+1) )
+	dz[1:NU+1] = JU
+	dz[NU+2:] = Ju
+	return dz
 
 # =============================================================================
 # Figure 9.1
@@ -69,49 +89,54 @@ def do_Fig_9_2(d, X, A):
 	N0 = N0p**(1/p)
 	dA = N0*(1+N0p)/x
 	kp = np.where(N0p > 0)[0]
-	print(kp)
 	
 	fig1, ax1 = plt.subplots()
 	ax1.set(xlabel = 'X/d', ylabel = 'dA')
-	ax1.annotate('Unstable', xytext = (5, 1.2), xy = (8, 1.2))
-	ax1.annotate('Stable', xytext = (5, 0.2), xy = (8, 0.2))
+	ax1.text(5, 0.15, 'Stable')
+	ax1.text(5, 1.2, 'Unstable')
 	ax1.plot(X/d, d*A, 'r.')
 	ax1.plot(x[kp], dA[kp])
 	ax1.set(xlim = (0, 14), ylim = (0, 2))
 	
-	
-	
-	
 	# --- Figure (b)
-	Nn= 2**7
-	dx = X/Nn
-	Nm = 2**4
-	dm = d/Nm
-	tspan = np.linspace(0, 500, 501)
-	s0 = [np.ones(Nm, 1), np.ones(Nn, 1)*dx/X]
-	soln = solve_ivp(de_rhs, tspan, s0)
-	S = soln.sol(tspan)
+	Nu = 2**7
+	dx = X/Nu
+	NU = 2**4
+	dy = d/NU
 	
-	n0 = A/(1+s(Nm)**7)
+	# --- IVP 
+	tf = 500
+	Uinit = np.ones(NU + 1)
+	uinit = np.ones(Nu + 1)*dx/X
 	
+	zinit = np.zeros( (NU+1 + Nu+1) )
+	zinit[:NU+1] = Uinit
+	zinit[NU+1:] = uinit
+	IVP_pars = [A, Nu, dx, NU, dy]
 	
+	soln = solve_ivp(de_rhs, [0, tf], zinit, args=[IVP_pars], dense_output=True)
+
+	# --- Evaluate solution
+	t = np.linspace(0, tf, 2**8+1)
+	z = soln.sol(t)
+	U = z[:NU+1, :]
+	u = z[NU+1:, :]
+	
+	# --- Reprogram u0, U0
+	u[0,:] = A*F(U[-1,:])
+	U0 = np.sum(u[0:Nu-1,:] + 2*u[1:Nu,:] + u[2:Nu+1,:], 0)*(dx/2)
 	fig2, ax2 = plt.subplots()
+	ax2.plot(t, U0)
 	ax2.set(xlabel = 'time (days)', ylabel = 'N(t)')
+	ax2.set(ylim = (0,2.5))
 	
 	return fig1, fig2
-	
-	
 
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
 def rbc_plots():
-	# --- Parameters for Figure 9.1
-	d = 70		# Time Delay
-	X = 50		# RBC lifetime
-	A = 1/50	# initial condition
-	
-	# --- Steady state values
+	# --- Steady State values for Figure 9.1
 	b_values = np.array([0.8, 0.5, 0.2])
 	N = np.linspace(0, 3, 2**8+1)
 
@@ -119,9 +144,9 @@ def rbc_plots():
 	F91a, F91b = do_Fig_9_1(b_values, N)
 
 	# --- Parameters for Figure 9.2
-	d = 7
-	X = 50
-	A = 0.1
+	d = 7		# Time Delay
+	X = 50		# RBC lifetime
+	A = 0.1		# production rate
 	
 	# --- Do the plotting
 	F92a, F92b = do_Fig_9_2(d, X, A)
