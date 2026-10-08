@@ -11,6 +11,8 @@ Figures produced:
  - Figure 2: Root Mean Squared Displacement (theoretical and actual)
 
 We leverage the Chapter 04 one_d_direction_switcher.py to create this simulation
+
+TO DO: The variance does not seem right
 """
 
 # =============================================================================
@@ -44,15 +46,15 @@ def xtTrajectory(v, kp, km, tmax, Ntmax):
 	x = np.zeros( Ntmax+1 )
 	t = np.zeros( Ntmax+1 )
 	kt = 0
-	# --- Each cycle: move right, switch time, move left, switch time
+	# --- Each cycle: move right, switch, move left, switch
 	while t[kt] < tmax:
 		# --- One cycle
 		R = rng.uniform(0, 1, 2)
 
-		dt1 = - np.log(R[0])/km
-		dt2 = - np.log(R[1])/kp
-		dx1 = v*dt1
-		dx2 = -v*dt2
+		dt1 = - np.log(R[0])/km # time moving right
+		dt2 = - np.log(R[1])/kp # time moving left
+		dx1 = v*dt1				# distance right	
+		dx2 = -v*dt2			# distance left
 
 		x[kt+1] = x[kt] + dx1
 		x[kt+2] = x[kt+1] + dx2
@@ -71,9 +73,9 @@ def one_d_direction_switcher_w_drift():
 	Np = 1000	    # particles
 	kminus = 0.5    # switch rate R to L
 	kplus = 1.5	    # switch rate L to R
-	v = 1			# velocity while moving
+	v = .5			# velocity while moving
 	tmax = 100		# maximum time
-	Ntmax = 5000	# maximum steps (big, just to populate arrays)
+	Ntmax = 5000	# maximum steps (big, just to preallocate arrays)
 	
 	# --- Parameters for interpolating to uniform mesh
 	ntt = 2**4
@@ -94,20 +96,34 @@ def one_d_direction_switcher_w_drift():
 		# --- Do the interpolation
 		X[:, kp] = np.interp(tt, t, x)
 
-	# --- Do some statistics
-	Xrms_actual = np.sqrt(np.mean(X**2, 1))
+	# --- Compute the mean, variance
+	Xdrift = np.mean(X, 1)
+	Xvar = np.var(X, 1)
 
-	# --- We expect Deff = v^2/(kplus + kminus)
+	# --- Do some statistics
+	Xrms = np.sqrt(np.mean(X**2, 1))
+
+	
+	# --- Drift: we expect veff = v*(kplus + kminus)/(kplus + kminus)
+	veff = v*(kplus - kminus)/(kplus + kminus)
+	Xdrift_theory = veff*tt
+	fig2, ax2 = plt.subplots()
+	ax2.plot(tt, Xdrift_theory, '--r', label='Theoretical')
+	ax2.plot(tt, Xdrift,'.b', label='Actual')
+	ax2.set(xlabel = 'time', ylabel = 'Drift',
+				title = 'One D Direction Switch with Drift')
+	ax2.legend()
+
+	# --- Mean Squared Displacement: we expect Deff = v^2/(kplus + kminus), 
 	Deff = v**2/(kplus + kminus)
 	Xrms_theory = Deff*tt
 
-	# --- Plot the Mean Squared Displacement
-	fig2, ax2 = plt.subplots()
-	ax2.plot(tt, Xrms_theory, '--r', label='Theoretical')
-	ax2.plot(tt, Xrms_actual,'.b', label='Actual')
-	ax2.set(xlabel = 'time', ylabel = 'Mean Squared Displacement',
+	fig3, ax3 = plt.subplots()
+	ax3.plot(tt, Xrms_theory , '--r', label='Theoretical')
+	ax3.plot(tt, Xrms,'.b', label='Actual')
+	ax3.set(xlabel = 'time', ylabel = 'Mean Squared Displacement',
 				title = 'One D Direction Switch with Drift')
-	ax2.legend()
+	ax3.legend()
 
 	plt.show()
 # =============================================================================
