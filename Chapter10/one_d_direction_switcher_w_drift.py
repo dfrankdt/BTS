@@ -12,7 +12,7 @@ Figures produced:
 
 We leverage the Chapter 04 one_d_direction_switcher.py to create this simulation
 
-TO DO: The variance does not seem right
+Note: The calculation of the coefficient for which var = 2 Deff t is tricky!
 """
 
 # =============================================================================
@@ -71,14 +71,14 @@ def xtTrajectory(v, kplus, kminus, tmax, Ntmax):
 def one_d_direction_switcher_w_drift():
 	# --- Global Parameters
 	Np = 1000	    # particles
-	kminus = 1.5    # switch rate R to L
-	kplus = 0.5	    # switch rate L to R
+	kminus = 0.5    # switch rate R to L
+	kplus = 1.5	    # switch rate L to R
 	v = 1			# velocity while moving
 	tmax = 100		# maximum time
 	Ntmax = 5000	# maximum steps (big, just to preallocate arrays)
 	
 	# --- Parameters for interpolating to uniform mesh
-	ntt = 2**3
+	ntt = 2**4
 	tt = np.linspace(0, tmax, ntt+1)
 	X = np.zeros( (ntt+1, Np) )
 
@@ -101,12 +101,6 @@ def one_d_direction_switcher_w_drift():
 	Xdrift = np.mean(X, 1)
 	Xvar = np.var(X, 1)
 
-	# --- Do some statistics
-	Xmsd = np.mean((X)**2, 1)
-	Xmsd = Xmsd - Xdrift**2
-	print(Xvar - Xmsd)
-
-	
 	# --- Drift: we expect veff = v*(kplus - kminus)/(kplus + kminus)
 	veff = v*(kplus - kminus)/(kplus + kminus)
 	Xdrift_theory = veff*tt
@@ -117,14 +111,13 @@ def one_d_direction_switcher_w_drift():
 				title = 'One D Direction Switch with Drift')
 	ax2.legend()
 
-	# --- Mean Squared Displacement: we expect Deff = v^2/(kplus + kminus), 
-	Deff = v**2/(kplus + kminus)
-	Xmsd_theory = 2*Deff*tt
-
+	# --- Variance: we expect Deff = 4v^2k kplus kminus/(kplus + kminus)^3, 
+	Deff = 4*v**2*kplus*kminus/(kplus + kminus)**3
+	Xvar_theory = 2*Deff*tt
 	fig3, ax3 = plt.subplots()
-	ax3.plot(tt, Xmsd_theory , '--r', label='Theoretical')
+	ax3.plot(tt, Xvar_theory , '--r', label='Theoretical')
 	ax3.plot(tt, Xvar,'.b', label='Actual')
-	ax3.set(xlabel = 'time', ylabel = 'Mean Squared Displacement',
+	ax3.set(xlabel = 'time', ylabel = 'Variance',
 				title = 'One D Direction Switch with Drift')
 	ax3.legend()
 
