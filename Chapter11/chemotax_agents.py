@@ -33,7 +33,7 @@ def c(x, y):
 # =============================================================================
 def doMSD(x, y):
 	"""
-	Do the mean-square-distance calculation on each timestep
+	Do the mean-square-distance from mean calculation on each timestep
 	"""
 	Nt = np.size(x, 0) - 1
 	Np = np.size(x, 1)
@@ -112,7 +112,6 @@ def chemotax_agents():
 	fig2, ax2 = plt.subplots()
 	ax2.plot(np.linspace(0, Tmax, Nt+1), msd, 'b')
 	ax2.plot(np.linspace(0, Tmax, Nt+1), msdc, 'r')
-	ax2.set(title = f'Drift from mean')
 	ax2.set(xlabel = 't', ylabel = 'Variance')
 	plt.show()
 	
