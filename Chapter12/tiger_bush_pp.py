@@ -56,6 +56,13 @@ def getPP(a, m):
 	n, w = z
 	ax.plot(n, w, 'k')
 
+	# --- Equilibrium Solutions: -wb**2 + a*wb - m**2 = 0, nb = m/wb
+	wbp = (a + np.sqrt(a**2 - 4*m**2))/2
+	wbm = (a - np.sqrt(a**2 - 4*m**2))/2
+	nbp = m/wbp
+	nbm = m/wbm
+	ax.plot([nbm, nbp], [wbm, wbp], '.k')
+
 	return fig, ax
 
 # =============================================================================
