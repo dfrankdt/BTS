@@ -21,6 +21,13 @@ def tiger_bush_MOL():
 	a = 7
 	m = 2
 	v = 20
+	L = 7.85
+	
+	# --- Variables
+	Nx = 2**8
+	x = np.linspace(0, L, Nx+1)
+	
+	# --- Initialization
 	
 
 
