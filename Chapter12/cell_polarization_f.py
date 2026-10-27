@@ -3,6 +3,7 @@
 Cell Polarization: We find a numerical solution to the reaction-diffusion equation
 with a slowly varying stimulus S(x, t).
 
+TO DO: Work on the Amplitude/Amplitude response curve, see Figure 12.12(a)
 """
 
 # =============================================================================
@@ -12,7 +13,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 import matplotlib.animation as manimation
-rng = np.random.default_rng()
 
 # =============================================================================
 # Parameters
@@ -36,9 +36,8 @@ def stim(x, t):
 	
 	# --- Amplitude
 	signal = ( (1 - np.cos(2*np.pi*x))/2 )**10
-	kamp = (t < ampzero)*ampmx*np.sin(amprate*t)**2
-	z = kamp*signal
-	return z
+	alpha = ampmx * (t<ampzero) * np.sin(amprate*t)**2
+	return alpha, signal
 
 # =============================================================================
 # Nonlinearity
@@ -68,8 +67,8 @@ def doSolve(dt, Nt, Nt_inter, x, uinit, vinit):
 	gamv = Dv*dt/(2*dx**2)
 	D2 = -2*np.eye(Nx + 1)
 	D2 = D2 + np.eye(Nx + 1, k=1) + np.eye(Nx + 1, k = -1)
-	# --- No Flux
-	D2[0, 0], D2[-1, -1] = -1, -1
+	# --- Periodic BC
+	D2[0, -1], D2[-1, 0] = 1, 1
 	
 	Acnu = np.eye(Nx+1) - gamu*D2
 	Acnv = np.eye(Nx+1) - gamv*D2
@@ -81,7 +80,8 @@ def doSolve(dt, Nt, Nt_inter, x, uinit, vinit):
 	tk = 0
 	for kt in range(Nt):
 		for kt_inter in range(Nt_inter):
-			S = stim(x, tk)
+			alpha, signal = stim(x, tk)
+			S = alpha*signal
 			yu = Bcnu@uk + dt*f(uk, vk, S)
 			yv = Bcnv@vk - dt*f(uk, vk, S)
 			ukp1 = np.linalg.solve(Acnu, yu)
@@ -102,22 +102,28 @@ def doMovie(x, t, U):
 	# --- Initialize data structures
 	Nt = len(t) - 1
 	uinit = U[:,0]
-	Umax = max(U[int((len(x) - 1)/2), :])
+	Umax = np.max(U, axis=0)
+	alpha, signal = stim(x, t)
 
 	# --- Initialize movie
-	fig, ax = plt.subplots()
-	p_init = ax.plot(x, uinit, '--r', label='Initial Profile')
-	p_update = ax.plot([], [], 'b', label='Time Evolution')[0]
-	ax.set(xlabel='x', ylabel='u(x, t)', ylim = (0, Umax))
-	ax.legend(loc='upper right')
+	fig, (ax1, ax2) = plt.subplots(1, 2, figsize = (12.8, 4.8))
+	p1_init = ax1.plot(alpha, Umax)
+	p1_update = ax1.plot(0, 0, 'o')[0]
+	ax1.set(xlabel = 'Stimulus Amplitude', ylabel = 'Response Amplitude')
+	p2_init = ax2.plot(x, uinit)
+	p2_update = ax2.plot([], [], 'b', label='Response')[0]
+	ax2.set(xlabel=r'$\xi$', ylabel=r'u($\xi$, $\tau$)', ylim = (0, 2))
+	ax2.legend(loc='upper right')
 
 	def update(frame):
 		tk = t[frame]
-		u = U[:, frame]
-		p_update.set_xdata(x)
-		p_update.set_ydata(u)
-		ax.set(title=f'Time t = {tk:.2f} s')
-		return(p_update)
+		uk = U[:, frame]
+		p1_update.set_xdata([alpha[frame]])
+		p1_update.set_ydata([Umax[frame]])
+		p2_update.set_xdata(x)
+		p2_update.set_ydata(uk)
+		return(p1_update, p2_update)
+		
 	ani = manimation.FuncAnimation(fig=fig, func=update,
 			frames=range(0, Nt+1), interval=100)
 
@@ -135,14 +141,14 @@ def cell_polarization_f():
 	dt = 0.1
 	x = np.linspace(0, L, Nx+1)
 	
-	# --- Initial profile
+	# --- Initialization and solve
 	Vt = 4.2
 	u0 = np.zeros(len(x))
 	v0 = Vt*np.ones(len(x))
 	t, U, V = doSolve(dt, Nt, Nt_inter, x, u0, v0)
 	
+	# --- Animation
 	ani = doMovie(x, t, U)
-	
 	plt.show()
 
 # =============================================================================

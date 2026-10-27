@@ -4,6 +4,8 @@ Gray-Scott-Turing: We examine neutral stability of the Turing Mechanism,
 the phase portrait for the Gray Scott model, and steady-state solutions 
 of the Gray-Scott model via the Method of Lines.
 
+TO DO: The MOL does not pick up the instability based on an initial condition
+that is a perturbation of the steady state.
 """
 
 # =============================================================================
@@ -13,7 +15,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 import matplotlib.animation as manimation
-rng = np.random.default_rng()
 
 # =============================================================================
 # DE Structure (ODE and PDE)
@@ -47,8 +48,9 @@ def pde_rhs(t, z, p):
 	D2V = D2V/dx**2
 	
 	# --- Right-hand side of the PDE
-	dUdt = Du*D2U - U*V**2 + rho*(1 - U)
-	dVdt = Dv*D2V + U*V**2 - (rho + kv)*V
+	F = U*V**2
+	dUdt = Du*D2U - F + rho*(1 - U)
+	dVdt = Dv*D2V + F - (rho + kv)*V
 	
 	# --- Evaluate for dz/dt
 	dz = np.zeros( (N+1) + (N+1) )
@@ -139,6 +141,8 @@ def doPP(kv, rho):
 	ax.plot(U, V, label = 'Trajectory')
 	
 	ax.set(xlim = (-0.1 , 1.1), ylim = (0, 1))
+	ax.annotate("", xytext=(0.7, 0.4), xy=(0.5, 0.6), 
+		arrowprops = dict(arrowstyle="->"))
 	ax.legend(loc = 'upper right')
 	return fig, ax
 
@@ -160,22 +164,23 @@ def doMOL(rho, kv, Du, Dv, L, n0):
 	z0[:Nx+1] = U0
 	z0[Nx+1:] = V0
 	PDE_pars = [kv, rho, Du, Dv, Nx/L]
-	tf = 250
-	
+	tf = 2500
+
+	# --- Use MOL to solve the PDE, we want the steady state
 	soln = solve_ivp(pde_rhs, [0, tf], z0, args = [PDE_pars], dense_output = True)
-	t = np.linspace(0, tf, 2**12+1)
-	z = soln.sol(t)
-	U = z[:Nx+1, :]
-	V = z[Nx+1:, :]
+	Uss = soln.y[:Nx+1,-1]
+	Vss = soln.y[Nx+1:,-1]
 	
 	fig, (ax1,ax2) = plt.subplots(1, 2, figsize = (12.8, 4.8))
-	ax1.plot(x, U[:, -1], label = 'Steady State')
+	ax1.plot(x, Uss, label = 'Steady State')
 	ax1.plot(x, U0, '--', label = 'Initial Condition')
 	ax1.set(xlabel = 'x', ylabel = 'u(x, t)', ylim = (0, 1))
+	ax1.legend(loc = 'upper right')
 	
-	ax2.plot(x, V[:, -1], label = 'Steady State')
+	ax2.plot(x, Vss, label = 'Steady State')
 	ax2.plot(x, V0, '--', label = 'Initial Condition')
 	ax2.set(xlabel = 'x', ylabel = 'v(x, t)', ylim = (0, 1))
+	ax2.legend(loc = 'upper right')
 
 	return fig, (ax1, ax2)
 # =============================================================================
@@ -188,16 +193,18 @@ def Gray_Scott_Turing_MOL():
 	Du = 1
 	Dv = 0.025
 	L = 20
-	
-	# --- Structure for Method of Lines
-	n0 = 6
-
 		
-	# --- Neutral Stability Curve
+	# --- Neutral Stability Curve and Phase Plane
 	fig1, ax1 = doStability(kv, rho, Du, Dv, L)
 	fig2, ax2 = doPP(kv, rho)
+
+	# --- Structure for Method of Lines
+	n0 = 6
 	fig3, (ax3a, ax3b) = doMOL(rho, kv, Du, Dv, L, n0)
-	
+
+	n0 = 8
+	fig4, (ax4a, ax4b) = doMOL(rho, kv, Du, Dv, L, n0)
+
 	plt.show()
 
 

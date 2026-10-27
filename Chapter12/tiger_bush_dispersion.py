@@ -10,8 +10,6 @@ Dispersion Curves for Tiger Bush Model:
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
-import matplotlib.animation as manimation
-rng = np.random.default_rng()
 
 # =============================================================================
 # Resultant
@@ -23,11 +21,11 @@ rng = np.random.default_rng()
 # =============================================================================
 def doDispersion(v, m, a_list):
 	Na = len(a_list)
-	Nw = 2**7
+	Nw = 2**8
 	# --- Variables
 	wmax = 3
-	w = np.linspace(0, wmax, Nw+1)
-	lam = np.zeros( (2, Nw+1) , dtype=complex)
+	w_list = np.linspace(0, wmax, Nw+1)
+	lam = np.zeros( (2,Nw+1) , dtype=complex)
 
 	# --- Initialize graph, step through a
 	fig, ax = plt.subplots()
@@ -42,25 +40,28 @@ def doDispersion(v, m, a_list):
 		
 		# --- Compute eigenvalues as a function of lambda
 		for kw in range(Nw+1):
-			fn = m - w[kw]**2
+			w = w_list[kw]
+			fn = m - w**2
 			fw = nbm**2
 			gn = -2*m
-			gw = 1 - nbm**2 + 1j*v*w[kw]
+			gw = 1 - nbm**2 + 1j*v*w
 			J = np.array([ [fn, fw], [gn, gw] ])
 			lam[:, kw] = np.linalg.eigvals(J)
-		ax.plot(w, lam[0,:].real, label = f'a = {a:1d}')
+		ax.plot(w_list, lam[0,:].real, label = f'a = {a:1d}')
 		kwmax = np.argmax(lam[0,:].real)
-		ax.plot(w[kwmax], lam[0, kwmax].real, '.k')
-		print(f'for a = {a:1.1f}')
-		print(f'we find lam = {lam[0, kwmax].real:.4f} {lam[0,kwmax].imag:+.4f}j')
-		print(f'and wavelength = {2*np.pi/w[kwmax]:1.3f}')
+		ax.plot(w_list[kwmax], lam[0, kwmax].real, '.k')
+		print(f'for a = {a:1.1f}, we find')
+		print(f'wmax = {w_list[kwmax]:0.3f}')
+		print(f'lam = {lam[0, kwmax].real:.4f} {lam[0,kwmax].imag:+.4f}j')
+		print(f'wavelength = {2*np.pi/w_list[kwmax]:1.3f}')
+		print(f'and wavespeed = {-lam[0,kwmax].imag/w_list[kwmax]:1.3f}\n')
 	ax.set(ylim=(-1.5, 1.5))
 	ax.plot([0, wmax], [0, 0], '--k')
 	ax.legend(loc = 'upper right')
 	return fig, ax
 	
 # =============================================================================
-# Dispersion Curve
+# Stability Diagram
 # =============================================================================
 def doStability(v):
     # --- From trace of Jacobian
@@ -92,7 +93,7 @@ def doStability(v):
     R = R + 24*B**4*M**2*N02 + 48*B**3*M**2*N02**2 - 48*B**2*M**3*N02**2
     R = R - 32*B*M**3*N02**3 + 32*M**4*N02**3
     
-    C = plt.contour(GM, M, R, [0])
+#    C = plt.contour(GM, M, R, [0])
 
     ax.text(3, 3, 'I')
     ax.text(6, 1, 'II')

@@ -62,7 +62,11 @@ def getPP(a, m):
 	nbp = m/wbp
 	nbm = m/wbm
 	ax.plot([nbm, nbp], [wbm, wbp], '.k')
-
+	ax.annotate("", xytext=(2, 2.5), xy=(2.5, 2), 
+                arrowprops = dict(arrowstyle="->"))
+	ax.annotate("", xytext=(0.75, 0.1), xy=(0.5, 1), 
+                arrowprops = dict(arrowstyle="->"))
+	
 	return fig, ax
 
 # =============================================================================
