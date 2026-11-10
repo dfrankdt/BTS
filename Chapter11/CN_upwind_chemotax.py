@@ -8,13 +8,12 @@ TO DO: Something is wrong with my upwinding. Ugh.
 """
 
 # =============================================================================
-# Packpages
+# Packages
 # =============================================================================
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 import matplotlib.animation as manimation
-rng = np.random.default_rng()
 
 # =============================================================================
 # Numerical Solve
@@ -27,8 +26,8 @@ def doSolve(x, Du, Dc, rho, K, chi, uinit, cinit):
 	# --- Spatial midpoints
 	xm = np.zeros(Nx+2)
 	xm[1:Nx+1] = (x[0:Nx] + x[1:Nx+1])/2
-	xm[0] = x[0] - dx
-	xm[-1] = x[-1] + dx
+	xm[0] = x[0] - dx/2
+	xm[-1] = x[-1] + dx/2
         
 	# --- Temporal Discretization
 	Nt = 2**5
