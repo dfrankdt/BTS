@@ -28,8 +28,8 @@ def doSolve(x, uinit, D, kappa):
 	# --- Spatial midpoints
 	xm = np.zeros(Nx+2)
 	xm[1:Nx+1] = (x[0:Nx] + x[1:Nx+1])/2
-	xm[0] = x[0] - dx
-	xm[-1] = x[-1] + dx
+	xm[0] = x[0] - dx/2
+	xm[-1] = x[-1] + dx/2
 	
 	# --- Temporal Discretization
 	Nt = 2**5
@@ -88,7 +88,7 @@ def OU_process():
 	x = np.linspace(-L, L, Nx+1)
 	
 	# --- Initialization
-	x0 = -2
+	x0 = 2
 	u0 = np.exp(-(x-x0)**2/0.1)
 	
 	# --- Numerical solution
