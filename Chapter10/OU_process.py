@@ -5,10 +5,7 @@ the solution of the reaction-diffusion equation given by (10.17).
 
 Produces:
  - Figure 1: Snapshots of the solution of the OU process as a function of time
- - Figure 2: 
- - Figure 3:
  
-TO DO: Update figures 2 and 3
 """
 
 # =============================================================================
@@ -102,16 +99,6 @@ def OU_process():
 	
 	plt.show()
 	
-	# --- Structure to check the total integral
-	int_u0 = np.trapezoid(u0, x)
-	int_U = np.trapezoid(U, x, axis=0)/int_u0
-	mj = np.argmax(U, 0)
-	mxU = np.max(U, 0)
-
-	fig2, ax2 = plt.subplots()
-	ax2.plot(t, x[mj])
-	plt.show()
-
 # =============================================================================
 # Execute the simulation if the script is run directly
 # =============================================================================
