@@ -4,7 +4,9 @@ CN with Upwind for Amobae and cAMP: We use an upwind scheme on the flux term
 and CN on the second derivative to find a numerical approximation to the 
 solution of the RD system.
 
-TO DO: Something is wrong with my upwinding. Ugh.
+Produces
+ - Figure 1: Snapshots of chemotactic amobae and chemoattractant, see Figure 11.3
+ - Figure 2: Animation of snapshots shown in Figure 1
 """
 
 # =============================================================================
@@ -23,17 +25,11 @@ def doSolve(x, Du, Dc, rho, K, chi, uinit, cinit):
 	dx = x[1] - x[0]
 	Nx = len(x) - 1
         
-	# --- Spatial midpoints
-	xm = np.zeros(Nx+2)
-	xm[1:Nx+1] = (x[0:Nx] + x[1:Nx+1])/2
-	xm[0] = x[0] - dx/2
-	xm[-1] = x[-1] + dx/2
-        
 	# --- Temporal Discretization
-	Nt = 2**5
-	Nt_steps = 2**11
-	dt = dx
-	t = np.zeros(Nt+1)
+	Nt = 2**4			# for outer loop
+	t = np.zeros(Nt+1)	# times to record solution
+	dt = dx				# step size for recording
+	Nt_steps = 2**11	# intermediate steps
         
 	# --- State variables
 	U = np.zeros( (Nx+1, Nt+1) )
@@ -59,18 +55,13 @@ def doSolve(x, Du, Dc, rho, K, chi, uinit, cinit):
 	tk = 0
 	for kt in range(Nt):
 		for kt_inter in range(Nt_steps):
-			# --- Flux for upwinding
-			cplus = np.zeros(Nx+2)
-			cplus[:-1] = ck
-			cminus = np.zeros(Nx+2)
-			cminus[1:] = ck
-			chalf = (cplus + cminus)/2
-			v = chi * (chalf[1:] - chalf[:-1])/dx
-			Jplus = np.zeros(Nx+2)
-			Jplus[1:] = v * uk * (v>0)
-			Jminus = np.zeros(Nx+2)
-			Jminus[:-1] = v * uk*(1 - (v>0))
-			J = ( Jplus + Jminus )
+			# --- Half steps for c
+			chalf = (ck[1:] + ck[:-1])/2
+			
+			# --- Velocity and upwind flux
+			v = chi * (ck[1:] - ck[:-1])/dx
+			J = np.zeros(Nx+2)
+			J[1:-1] = v * (uk[:-1] * (v>0) + uk[1:] * (1 - (v>0)))
 			dJ = (J[1:] - J[:-1])/dx
 			
 			# --- Do the CN
@@ -87,6 +78,57 @@ def doSolve(x, Du, Dc, rho, K, chi, uinit, cinit):
 		t[kt+1] = tk
 	return t, U, C
 
+# =============================================================================
+# Do the plotting
+# =============================================================================
+def doPlots(x, U, C):
+	# --- Initialization
+	u0, c0 = U[:, 0], C[:, 0]
+	fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.8, 4.8))
+	ax1.plot(x, u0, '--')
+	ax2.plot(x, c0, '--')
+	
+	# --- Plot the following timesteps
+	ax1.plot(x, U[:, 1:])
+	ax2.plot(x, C[:, 1:])
+	ax1.set(xlabel = 'x', ylabel = 'u(x, t)', ylim = (0, 18))
+	ax2.set(xlabel = 'x', ylabel = 'c(x, t)', ylim = (0, 18))
+	return fig, ax1, ax2
+
+# =============================================================================
+# Animation
+# =============================================================================
+def doMovie(x, t, U, C):
+	# --- Initialization
+	Nt = len(t) - 1
+	u0, c0 = U[:, 0], C[:, 0]
+	
+	# --- Initialize movie
+	fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.8, 4.8))
+	u_plot_init = ax1.plot(x, u0, '--r', label = 'Initial Profile')
+	c_plot_init = ax2.plot(x, c0, '--r', label = 'Initial Profile')
+	u_update = ax1.plot([], [], '-b', label = 'Time Evolution')[0]
+	c_update = ax2.plot([], [], '-b', label = 'Time Evolution')[0]
+	ax1.set(xlabel = 'x', ylabel = 'u(x, t)', ylim=(0, 18))
+	ax2.set(xlabel = 'x', ylabel = 'c(x, t)', ylim=(0, 18))
+	ax1.legend(loc = 'upper right')
+	ax2.legend(loc = 'upper right')
+	
+	# --- Funciton to update plot
+	def update(frame):
+		tk = t[frame]
+		uk = U[:, frame]
+		ck = C[:, frame]
+		u_update.set_xdata(x)
+		u_update.set_ydata(uk)
+		c_update.set_xdata(x)
+		c_update.set_ydata(ck)
+		ax1.set(title=f'Chemotatic Amobae, t = {tk:4.1f} s')
+		ax2.set(title=f'Chemoattractant, t = {tk:4.1f} s')
+		return (u_update, c_update)
+	
+	ani = manimation.FuncAnimation(fig=fig, func=update, frames=range(Nt+1), interval=100)
+	return ani
 
 # =============================================================================
 # Main Simulation Function
@@ -104,21 +146,17 @@ def CN_upwind_chemotax():
 	Nx = 2**8
 	x = np.linspace(0, L, Nx + 1)
 	
-	# --- Initialization
+	# --- Initialization and solve
 	u0 = np.ones(Nx+1) + 0.1/np.cosh(10 * (x - L/3.9) )
 	c0 = rho/K*u0
-	
 	t, U, C = doSolve(x, Du, Dc, rho, K, chi, u0, c0)
 	
-	fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.8, 4.8))
-	ax1.plot(x, u0, '--')
-	ax2.plot(x, c0, '--')
-	ax1.plot(x, U[:, 1:])
-	ax2.plot(x, C[:, 1:])
-	ax1.set(xlabel = 'x', ylabel = 'u(x, t)', ylim = (0, 18))
-	ax2.set(xlabel = 'x', ylabel = 'c(x, t)', ylim = (0, 18))
-	plt.show()
+	# --- Plotting and Animation
+	fig, ax1, ax2 = doPlots(x, U, C)
+#	plt.show()
 
+	ani = doMovie(x, t, U, C)
+	plt.show()
 
 # =============================================================================
 # Execute the simulation if the script is run directly

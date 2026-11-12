@@ -115,8 +115,15 @@ def doPP(k):
 		#ax.plot(v, w, '.', color = colorlist[kv])
 		#ax.plot(v, -w, '.', color = colorlist[kv])
 
-	# --- Add equilibria to the phase plane
+	# --- Add equilibria and nullclines to the phase plane
 	ax.plot([vbar, 1], [0, 0], 'ok')
+	ax.plot([0, 1.5], [0, 0], '--k')
+	ax.plot([vbar, vbar], [-0.5, 0.5], '--k')
+	ax.plot([1, 1], [-0.5, 0.5], '--k')
+	ax.annotate('', xytext = (0.9, 0.45), xy=(1.1, 0.45),
+				arrowprops=dict(arrowstyle='->', lw=2))
+	ax.annotate('', xytext = (1.1, -0.45), xy=(0.9, -0.45),
+				arrowprops=dict(arrowstyle='->', lw=2))
 	ax.set(xlabel = 'v', ylabel = r'dv/d$\xi$')
 	return fig, ax
 
