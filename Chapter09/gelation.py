@@ -7,8 +7,13 @@ Gelation: This script solves the pde
 where the initial profile is given by W0 and the velocity is prescribed
 by a general form v = W/2 in order to give Burgers equation.
 
-Produces: 
-
+Produces:
+ - Figure 1: Snapshots of solution using upwinding, see Figure 9.6
+ - Figure 2: Animation of upwinding snapshots
+ - Figure 3: Snapshots of exact solution using characteristics, see Figure 9.7 (a)
+ - Figure 4: Characteristic curves, see Figure 9.7 (b)
+ - Figure 5: Monomer and gel quantities before and after gelation, see Figure 9.9
+ 
 TO DO: Check whether we get Figure 9.8 (a) and (b).  
 """
 
@@ -28,13 +33,6 @@ def W(x, C0, k):
 	return Wofz
 
 # =============================================================================
-# Upwinding Velocity
-# =============================================================================
-def v(x, t, u):
-	vel = 1/2*u
-	return vel
-
-# =============================================================================
 # Upwinding Right-hand Side of the Differential Equation
 # =============================================================================
 def de_rhs(t, u, x):
@@ -42,24 +40,18 @@ def de_rhs(t, u, x):
 	Nx = len(x) - 1
 	dx = x[1] - x[0]
 	
-	# --- Need the flux J = v*u, but first need half step values for x and u 
-	xjmh = np.zeros(Nx+2)
-	xjmh[:-1] = x - dx/2
-	xjmh[-1] = x[-1] + dx/2
-
+	# --- Identify the velocity and get the flux, be sure to upwind.	
 	um = np.zeros(Nx+2)
 	um[:-1] = u
 	up = np.zeros(Nx+2)
 	up[1:] = u
-	
-	ujmh = (um+up)/2
+	umid = (um+up)/2
 
-	# --- Call the velocity and get the flux, be sure to upwind.	
-	vjmh = v(xjmh, t, ujmh)
-	Jmh = vjmh*( (vjmh>0)*up + (vjmh<0)*um )
+	v = 1/2 * umid
+	J = v*( (v>0)*up + (v<0)*um )
 	
 	# --- Now get the difference
-	dJ = Jmh[1:] - Jmh[:-1]
+	dJ = J[1:] - J[:-1]
 	du = -dJ/dx
 	
 	return du
@@ -220,6 +212,7 @@ def doGel(C0, k, tend):
 	ax.plot(t, 2*W_Int - W1, 'r', label = r'$M_1$')
 	ax.plot(t, Rs, 'k', label = r'$R_s$')
 	ax.plot(t, R, '--k', label = r'$R$')
+	ax.set(xlabel = 't')
 	ax.legend(loc = 'upper right')
 	
 	return fig, ax
@@ -247,8 +240,8 @@ def gelation():
 	# --- Structure to produce visualization
 	t = np.linspace(0, tf, Nt+1)
 	Wappx = soln.sol(t)
-	#ani = doMovie(z, t, Wappx)
 	fig, ax = doSnapShots(z, t, Wappx)
+	ani = doMovie(z, t, Wappx)
 	
 	# --- Exact Solution via Characteristics
 	fig_ex, ax_ex = doExact(z, t, C0, k)
