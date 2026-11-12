@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """
-Dispersion Curves for Tiger Bush Model:
+Dispersion Curves for Tiger Bush Model: Illustrate change in stability and 
+divide region II (from tiger_bush_pp) into two regions, one with unstable modes
+
+Produces
+ - Figure 1: Real part of the eigenvalue as a function of w, illustrating a 
+   change in stability between a = 8 and a = 7.
+ - Figure 2: Division of Region II into separate regions
+
+TO DO: The level surface plot does not seem to separate region II
 
 """
 
@@ -111,6 +119,7 @@ def tiger_bush_dispersion():
 	m = 2
 	a_list = [5, 6, 7, 8]
 	
+	# --- Dispersion and stability
 	fig1, ax1 = doDispersion(v, m, a_list)
 	fig2, ax2 = doStability(v)
 	plt.show()

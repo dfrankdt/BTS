@@ -83,7 +83,10 @@ def getBifDiag():
 	# --- Plotting
 	ax.plot(x, y1, x, y2)
 	ax.set(xlabel = r'$\gamma$', ylabel = r'$V_T$', xlim=(0, 4), ylim=(0,4))
-	
+	ax.annotate('II', xytext = (1, 1.5), xy = (1.5, 2), 
+		arrowprops=dict(arrowstyle='->', lw=2)) 
+	ax.text(0.9, 0.9, 'I')
+	ax.text(2.5, 2.5, 'II')
 	return fig, ax
 	
 # =============================================================================

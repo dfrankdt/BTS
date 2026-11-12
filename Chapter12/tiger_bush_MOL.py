@@ -106,6 +106,8 @@ def tiger_bush_MOL():
 	W = Z[:Nx+1, :]
 	U = Z[Nx+1:, :]
 	
+	
+	
 	ani = doMovie(x, t, U, W)
 	plt.show()	
 

@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 """
-Phase Plane for the Tiger Bush System:
+Phase Plane for the Tiger Bush System: Examine ODE dynamics for the Tiger Bush
+System.
 
+Produces
+ - Figure 1: Nullclines and trajectories in the n-w plane for different 
+   initial conditions
+ - Figure 2: Stability diagram illustrating regions where (I) the only steady
+   state has no vegetation, (II) the existence of three steady states with two
+   of those being stable, and (III) the existence of three steady states with only
+   the no vegetation state being stable
 """
 
 # =============================================================================
@@ -36,8 +44,8 @@ def getPP(a, m):
 	x = np.linspace(4/2**8, 4, 2**8)
 	yw = a/(1+x**2)
 	yn = m/x
-	ax.plot(x, yn, '--')
-	ax.plot(x, yw, '--')
+	ax.plot(x, yn, '--k')
+	ax.plot(x, yw, '--k')
 	
 	# --- Solution Trajectories
 	tf = 10
@@ -48,13 +56,13 @@ def getPP(a, m):
 	soln = solve_ivp(de_rhs, [0, tf], z0, args = [IVP_pars], dense_output=True)
 	z = soln.sol(t)
 	n, w = z
-	ax.plot(n, w, 'k')
+	ax.plot(n, w, 'r')
 	
 	z0 = [1.5, 0.]
 	soln = solve_ivp(de_rhs, [0, tf], z0, args = [IVP_pars], dense_output=True)
 	z = soln.sol(t)
 	n, w = z
-	ax.plot(n, w, 'k')
+	ax.plot(n, w, 'b')
 
 	# --- Equilibrium Solutions: -wb**2 + a*wb - m**2 = 0, nb = m/wb
 	wbp = (a + np.sqrt(a**2 - 4*m**2))/2

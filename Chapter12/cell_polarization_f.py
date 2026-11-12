@@ -3,6 +3,10 @@
 Cell Polarization: We find a numerical solution to the reaction-diffusion equation
 with a slowly varying stimulus S(x, t).
 
+Produces
+ - Figure 1: Animation graphing the response amplitude as a function of the 
+   stimulus amplitude; illustrates hysteritic behavior
+
 TO DO: Work on the Amplitude/Amplitude response curve, see Figure 12.12(a)
 """
 

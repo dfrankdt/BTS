@@ -4,8 +4,13 @@ Gray-Scott-Turing: We examine neutral stability of the Turing Mechanism,
 the phase portrait for the Gray Scott model, and steady-state solutions 
 of the Gray-Scott model via the Method of Lines.
 
+Produces
+ - Figure 1: Neutral Stability Curve for the RD system
+ - Figure 2: Phase plane for ODE dynamics
+ - Figures 3-4: Initial condition and steady state for two different modes
+
 TO DO: The MOL does not pick up the instability based on an initial condition
-that is a perturbation of the steady state.
+that is a perturbation of the steady state (see Figures 3-4).
 """
 
 # =============================================================================
