@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-One Dimensional Direction Switcher with Drift: 
+One Dimensional Direction Switcher with Drift: See exercise 10.1
 This script is an algorithm to simulate movement of an object (say, bacterium)
 that switches between moving in a one dimensional line with velocity v but 
 randomly switches direction by an exponential process with rate constants 

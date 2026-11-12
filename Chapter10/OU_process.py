@@ -59,12 +59,12 @@ def doSolve(x, uinit, D, kappa):
 			# --- Flux for upwinding
 			v = -kappa*(xm)
 			kx_up = (v>0)
-			upos = np.zeros(Nx+2)
-			upos[1:] = uk
+			uplus = np.zeros(Nx+2)
+			uplus[1:] = uk
 			uminus = np.zeros(Nx+2)
 			uminus[:-1] = uk
 			
-			F = v * ( (v>0)*upos + (1 - (v>0))*uminus )
+			F = v * ( (v>0)*uplus + (1 - (v>0))*uminus )
 			dF = (F[1:] - F[:-1])/dx
 			y = Bcn@uk - dt*dF
 			ukp1 = np.linalg.solve(Acn, y)

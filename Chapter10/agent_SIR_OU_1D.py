@@ -2,7 +2,6 @@
 """
 Agent Based OU Process with SIR:
 
-TO DO: If you feel like it, solve exercise 10.6
 """
 
 # =============================================================================
@@ -18,6 +17,8 @@ rng = np.random.default_rng()
 # Main Simulation Function
 # =============================================================================
 def agent_SIR_OU_1D():
+	print('\nIf you feel like it, solve exercise 10.6.')
+	print('Chapter 6 SIR codes will be useful in this process! \n')
 
 
 
