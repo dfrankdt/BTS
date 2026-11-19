@@ -69,7 +69,74 @@ def doPhasePlane(rho):
 		ax.plot(u, v)
 	
 	return fig, ax
+	
+# =============================================================================
+# 
+# =============================================================================
+def gev(u, r):
+	# --- Initialization
+	s0, K, g, d, alph = doPars()
+
+	cf = 1/((1 - r)*alph/(d*r) + 1) - 1
+	y = cf*u + f(u)/d
+	return y
 		
+# =============================================================================
+# Triphasic Steady States
+# =============================================================================
+def getSScurves(u):
+	# --- Initialization
+	s0, K, g, d, alph = doPars()
+	fig, ax = plt.subplots()
+	ax.set(xlabel = r'Cell Density ($\rho$)', ylabel ='Intracellular Autoinducer (u)')
+	ax.set(xlim = (0, 0.04), ylim = (0, 3))
+	rho = alph*(d*u - f(u))/(d*f(u) - alph*f(u) + d*alph*u)
+	ax.plot(rho, u)
+	ax.text(0.020, 2.5, r'$c>0$')
+	ax.text(0.005, 2.5, r'$c<0$')
+	
+	# --- Find the steady states in u
+	rmin, rmax = np.min(rho), np.max(rho)
+	rj = np.linspace(rmin, rmax, 2**8+1)
+	rhok = np.zeros( len(rj) )
+
+	# --- Step through rho values
+	for jr in range(len(rj)):
+		rk = 0
+		r = rj[jr]
+		geV = gev(u, r)
+		Texp = np.zeros(len(rj))
+		
+#		# --- Find triphasic steady-states
+#		sgc = geV[:-1]*geV[1:] 
+#		idx = np.where(sgc<0)
+#		if len(idx) == 3:
+#			rk += 1
+#			tst = (np.abs(geV[idx]) > np.abs(geV[idx+1]))
+#			idx = idx + tst
+#			Uss = u[idx]
+#			cf = (1 - r)*alph/(d*r) + 1
+#			Vss = Uss/cf
+#			
+#			# --- Identify the speed sign expressions
+#			Ex1 = -r*d*(Vss - Uss)**2 / (2*(1 - r)) - alpha*Vss**2/2
+#			DelU = (Uss[2] - Uss[0])/100
+#			uss = np.linspace(Uss[0], Uss[2], 101)
+#			Fus = f(uss)
+#			Ex2 = r*(np.sum(Fus - Fus[0]/2 - Fus[2]/2)) * DelU*(1-r)
+#			Texp[rk] = Ex1[2] -Ex1[1] + Ex2
+#		
+#			tcross = Texp[:-1]*Texp[1:]
+#			tj = np.where(tcross<=0)
+#	
+#			tst = np.abs(Texp[tj]) > np.abs(Texp[tj+1])
+#			rhocross = rhok[tj + tst]
+	
+#	ax.plot(rhocross*np.ones(len(u)), u)
+	ax.plot(0.013*np.ones(len(u)), u, '--r')
+	return fig, ax
+	
+
 # =============================================================================
 # Main Simulation Function
 # =============================================================================
@@ -95,7 +162,10 @@ def quorum_pp():
 			arrowprops=dict(arrowstyle='->', lw=2))
 	ax3.annotate('', xytext=(1.5, 0.6), xy=(1.75, 0.75),
 			arrowprops=dict(arrowstyle='->', lw=2))
-			
+
+	# --- Triphasic steady states in Intracellular Autoinducer
+	u = np.linspace(0, 3, 2**8+1)
+	fig4, ax4 = getSScurves(u)			
 	plt.show()		
 
 

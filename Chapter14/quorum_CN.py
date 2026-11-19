@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """
-CN Analysis of Quorum Sensing: 
+CN Analysis of Quorum Sensing: Numerical approximation to the solution of the
+coupled PDE (14.11) -- (14.12) describing quorum sensing. Diffusion operator
+is handled by Crank-Nicolson and the reaction terms by Forward Euler.
+
+Produces
+ - Figure 1: Snapshots of intracellular and extracellular auto inducer
+ - Figure 2: Animation showing the traveling wave
 
 """
 
@@ -92,11 +98,12 @@ def doMovie(x, t, U, V):
 	Nt = len(t) - 1
 	fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (6.4, 9.6))
 	u_init = ax1.plot(x, U[:,0], '--r')
+	v_init = ax2.plot(x, V[:,0], '--r')
 	u_update = ax1.plot([], [], 'b')[0]	
 	v_update = ax2.plot([], [], 'b')[0]
 	ax1.set(xlabel = 'x', ylabel = 'Intracellular Autoinducer, u(x, t)', 
 		xlim = (0, 10), ylim=(0, 2))
-	ax2.set(xlabel = 'x', ylabel = 'Intracellular Autoinducer, v(x, t)', 
+	ax2.set(xlabel = 'x', ylabel = 'Extracellular Autoinducer, v(x, t)', 
 		xlim = (0, 10), ylim=(0, 2))
 
 	# --- Animation
@@ -128,12 +135,12 @@ def quorum_CN():
 	v0 = np.zeros(Nx+1)
 	t, U, V = doSolve(x, u0, v0, rho, D)
 	
-	# ---
+	# --- Snapshots
 	fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (6.4, 9.6))
 	ax1.plot(x, U[:, 1:])
 	ax1.set(xlabel = 'x', ylabel = 'Intracellular Autoinducer, u(x, t)', ylim=(0, 2))
 	ax2.plot(x, V[:, 1:])
-	ax2.set(xlabel = 'x', ylabel = 'Intracellular Autoinducer, v(x, t)', ylim=(0, 2))
+	ax2.set(xlabel = 'x', ylabel = 'Extracellular Autoinducer, v(x, t)', ylim=(0, 2))
 	
 
 	ani = doMovie(x, t, U, V)	
