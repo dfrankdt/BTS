@@ -3,6 +3,7 @@
 Quorum Sensing: We examine the first order system governing the steady-state
 solution on the bounded domain.
 
+TO DO: Identify the outputs and better comment the code
 """
 
 # =============================================================================
@@ -55,8 +56,9 @@ def uw_de_rhs(t, z, rho):
 	# --- State Variables
 	u, w = z
 	du = w/D
-	dw = (fpp(u)*w**2/(d*D) + alph*u - (alph/d + rho/(1-rho))*f(u))
+	dw = (fpp(u)*w**2/(d*D) + alph*u - (alph/d + rho/(1-rho))*f(u))/(1 - fp(u)/d)
 	dz = np.array([du, dw])
+	return dz
 
 def uw_NC(t, z, rho):
 	# --- Parameters
@@ -76,26 +78,47 @@ def get_uwPP(rho):
 	s0, K, gamma, alph, K, d, D = doPars()
 	u = np.linspace(0, 3, 2**8 + 1)
 	w = - np.sqrt(alph*D)*(u - f(u)/d)/(1 - fp(u)/d)
+	v = u - f(u)/d
+	vx = (1 - fp(u)/d)*w
 	
-	fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8.8, 6.4))
-	ax1.plot(u, w, '--')
-	ax1.set(xlabel = 'u', ylabel = r'u$_x$')
+	fig1, (ax1a, ax1b) = plt.subplots(1, 2, figsize=(8.8, 6.4))
+	ax1a.plot(u, w, '--')
+	ax1a.set(xlabel = 'u', ylabel = r'u$_x$')
+	ax1b.plot(v, vx, '--')
+	ax1b.set(xlabel = 'v', ylabel = r'v$_x$')
+
+	fig2, (ax2a, ax2b) = plt.subplots(1, 2, figsize=(8.8, 6.4))
+	ax2a.set(xlabel = 'x', ylabel = 'u(x)')
 	
-	u0_list = np.linspace(2, 3, 2**4+1)
+	u0_list = np.linspace(0.1, 2.9, 2**8+1)
+	uL_list = np.zeros(len(u0_list))
+	L_list = np.zeros(len(u0_list))
 	IVP_args = rho
 	for ku0 in range(len(u0_list)):
 		u0 = u0_list[ku0]
 		z0 = [u0, 0]
-		tmax = 100
-		soln = solve_ivp(uw_de_rhs, [0, tmax], z0, args=[IVP_args], 
+		Lmax = 30
+		soln = solve_ivp(uw_de_rhs, [0, Lmax], z0, args=[IVP_args], 
 				events = uw_NC, dense_output = True)
-		tf = max(soln.t)
-		print(tf)
-		t = np.linspace(0, tf, 2**8+1)
-		u, w = soln.sol(t)
-		ax1.plot(u, w)
-	
-	return fig, ax1, ax2
+		L = max(soln.t)
+		x = np.linspace(0, L, 2**8+1)
+		u, w = soln.sol(x)
+		if np.mod(ku0, 2**3)==0:
+			ax1a.plot(u, w)
+			ax2a.plot(x, u)
+
+			v = u - f(u)/d
+			vx = (1 - fp(u)/d)*w
+			ax1b.plot(v, vx)
+
+		L_list[ku0] = L
+		uL_list[ku0] = u[-1]
+
+	ax2a.plot(L_list, uL_list, '--')
+	ax2b.plot(L_list, u0_list, label = 'u(0)')
+	ax2b.plot(L_list, uL_list, '--', label = 'u(L)')
+	ax2b.legend(loc = 'upper right')	
+	return fig1, ax1a, ax1b, fig2, ax2a, ax2b
 
 # =============================================================================
 # Main Simulation Function
@@ -103,7 +126,7 @@ def get_uwPP(rho):
 def quorum_bounded_domain_ss_pp():
 	# --- Density
 	rho = 0.04
-	fig, ax1, ax2 = get_uwPP(rho)
+	fig1, ax1a, ax1b, fig2, ax2a, ax2b = get_uwPP(rho)
 	
 	plt.show()
 
